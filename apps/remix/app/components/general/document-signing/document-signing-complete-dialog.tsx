@@ -207,7 +207,7 @@ export const DocumentSigningCompleteDialog = ({
         </Button>
       </DialogTrigger>
 
-      <DialogContent position={position}>
+      <DialogContent position={position} className="dark-mode-disabled">
         <DialogHeader>
           <DialogTitle>
             <Trans>Are you sure?</Trans>

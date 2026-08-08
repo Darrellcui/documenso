@@ -152,7 +152,7 @@ export const DocumentSigningAutoSign = ({ recipient, fields }: DocumentSigningAu
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent>
+      <DialogContent className="dark-mode-disabled">
         <DialogHeader>
           <DialogTitle>
             <Trans>Automatically sign fields</Trans>

@@ -83,7 +83,7 @@ export const DocumentSigningAuthDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={handleOnOpenChange}>
-      <DialogContent>
+      <DialogContent className="dark-mode-disabled">
         <DialogHeader>
           <DialogTitle>
             {selectedAuthType && validAuthTypes.length > 1 && (

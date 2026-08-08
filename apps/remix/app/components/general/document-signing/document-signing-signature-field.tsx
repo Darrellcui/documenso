@@ -264,7 +264,7 @@ export const DocumentSigningSignatureField = ({
       )}
 
       <Dialog open={showSignatureModal} onOpenChange={setShowSignatureModal}>
-        <DialogContent>
+        <DialogContent className="dark-mode-disabled">
           <DialogTitle>
             <Trans>
               Sign as {recipient.name} <div className="h-5 text-muted-foreground">({recipient.email})</div>

@@ -107,7 +107,7 @@ export function DocumentSigningRejectDialog({
         )}
       </DialogTrigger>
 
-      <DialogContent>
+      <DialogContent className="dark-mode-disabled">
         <DialogHeader>
           <DialogTitle>
             <Trans>Reject Document</Trans>

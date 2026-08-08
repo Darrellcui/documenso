@@ -21,7 +21,7 @@ export const SignaturePadColorPicker = ({
           <SelectValue placeholder="" />
         </SelectTrigger>
 
-        <SelectContent className="w-[100px]" align="end">
+        <SelectContent className="w-[100px] dark-mode-disabled" align="end">
           <SelectItem value="black">
             <div className="flex items-center text-[0.688rem] text-muted-foreground">
               <div className="mr-1 h-4 w-4 rounded-full border-2 border-border bg-black shadow-sm" />

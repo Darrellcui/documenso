@@ -110,7 +110,7 @@ export const SignaturePadDialog = ({
       </motion.button>
 
       <Dialog open={showSignatureModal} onOpenChange={disabled ? undefined : setShowSignatureModal}>
-        <DialogContent hideClose={true} className="p-6 pt-4">
+        <DialogContent hideClose={true} className="p-6 pt-4 dark-mode-disabled">
           <SignaturePad
             id="signature"
             fullName={fullName}

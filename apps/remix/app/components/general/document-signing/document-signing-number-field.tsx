@@ -245,7 +245,7 @@ export const DocumentSigningNumberField = ({ field, onSignField, onUnsignField }
       )}
 
       <Dialog open={showNumberModal} onOpenChange={setShowNumberModal}>
-        <DialogContent>
+        <DialogContent className="dark-mode-disabled">
           <DialogTitle>{parsedFieldMeta?.label ? parsedFieldMeta?.label : <Trans>Number</Trans>}</DialogTitle>
 
           <div>

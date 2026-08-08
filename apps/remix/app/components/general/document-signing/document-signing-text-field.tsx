@@ -240,7 +240,7 @@ export const DocumentSigningTextField = ({ field, onSignField, onUnsignField }: 
       )}
 
       <Dialog open={showCustomTextModal} onOpenChange={setShowCustomTextModal}>
-        <DialogContent>
+        <DialogContent className="dark-mode-disabled">
           <DialogTitle>{parsedFieldMeta?.label ? parsedFieldMeta?.label : <Trans>Text</Trans>}</DialogTitle>
 
           <div>

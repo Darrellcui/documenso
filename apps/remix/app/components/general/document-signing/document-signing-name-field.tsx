@@ -169,7 +169,7 @@ export const DocumentSigningNameField = ({ field, onSignField, onUnsignField }: 
       )}
 
       <Dialog open={showFullNameModal} onOpenChange={setShowFullNameModal}>
-        <DialogContent>
+        <DialogContent className="dark-mode-disabled">
           <DialogTitle>
             <Trans>
               Sign as
