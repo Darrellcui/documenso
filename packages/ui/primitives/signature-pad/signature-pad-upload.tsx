@@ -63,6 +63,58 @@ const loadImageOntoCanvas = (
   return imageData;
 };
 
+/**
+ * Export only the visible content of the canvas, cropping the transparent
+ * margins introduced by centering the uploaded image at 80% scale on the
+ * wide pad canvas.
+ *
+ * Without this, roughly square transparent images (e.g. company stamps and
+ * seals) are exported together with the full canvas whitespace and render
+ * tiny once the signature is contain-fitted into a field on the document.
+ *
+ * Images without an alpha channel (e.g. JPEG uploads) yield a full-canvas
+ * bounding box, so their behaviour is unchanged.
+ */
+const exportTrimmedCanvas = (canvas: HTMLCanvasElement, imageData: ImageData): string => {
+  const { data, width, height } = imageData;
+
+  let minX = width;
+  let minY = height;
+  let maxX = -1;
+  let maxY = -1;
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (data[(y * width + x) * 4 + 3] !== 0) {
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+      }
+    }
+  }
+
+  // Fully transparent canvas — fall back to the original export.
+  if (maxX < minX || maxY < minY) {
+    return canvas.toDataURL();
+  }
+
+  const trimmedCanvas = document.createElement('canvas');
+
+  trimmedCanvas.width = maxX - minX + 1;
+  trimmedCanvas.height = maxY - minY + 1;
+
+  const trimmedCtx = trimmedCanvas.getContext('2d');
+
+  if (!trimmedCtx) {
+    return canvas.toDataURL();
+  }
+
+  trimmedCtx.putImageData(imageData, -minX, -minY);
+
+  return trimmedCanvas.toDataURL();
+};
+
 export type SignaturePadUploadProps = {
   className?: string;
   value: string;
@@ -87,8 +139,10 @@ export const SignaturePadUpload = ({ className, value, onChange, ...props }: Sig
         return;
       }
 
-      $imageData.current = loadImageOntoCanvas(img, $el.current, ctx);
-      onChange?.($el.current.toDataURL());
+      const imageData = loadImageOntoCanvas(img, $el.current, ctx);
+
+      $imageData.current = imageData;
+      onChange?.(exportTrimmedCanvas($el.current, imageData));
     } catch (error) {
       console.error(error);
     }
