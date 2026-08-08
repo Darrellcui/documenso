@@ -77,6 +77,8 @@ const textMutedForegroundLight = '#929DAE';
 const textForeground = '#000';
 const textMutedForeground = '#64748B';
 const textRejectedRed = '#dc2626';
+const brandNavy = '#003B6F';
+const brandNavySoft = 'rgba(0, 59, 111, 0.12)';
 const textBase = 10;
 const textSm = 9;
 const textXs = 8;
@@ -96,7 +98,6 @@ const pageTopMargin = 72;
 const pageBottomMargin = 24;
 const contentMaxWidth = 768;
 
-const titleFontSize = 18;
 
 type RenderLabelAndTextOptions = {
   label: string;
@@ -760,6 +761,88 @@ export async function renderCertificate({
   const brandingRect = brandingGroup.getClientRect();
   const brandingTopPadding = 24;
 
+  // Xenvera logo for the certificate header. Loaded once and reused across
+  // pages. The SVG is rasterised to PNG so skia-canvas can draw it.
+  let headerLogoImage: HTMLImageElement | null = null;
+  try {
+    const xenveraSvg = fs.readFileSync(path.join(process.cwd(), 'public/xenvera.svg'), 'utf8');
+    const xenveraPng = await svgToPng(xenveraSvg);
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    headerLogoImage = new SkiaImage(xenveraPng) as unknown as HTMLImageElement;
+  } catch {
+    headerLogoImage = null;
+  }
+
+  const headerLogoSize = 30;
+  const headerRuleY = pageTopMargin - 14;
+
+  const buildHeader = () => {
+    const header = new Konva.Group();
+
+    let titleX = margin;
+
+    if (headerLogoImage) {
+      const logoWidth = headerLogoSize * (headerLogoImage.width / headerLogoImage.height);
+      header.add(
+        new Konva.Image({
+          image: headerLogoImage,
+          x: margin,
+          y: 12,
+          width: logoWidth,
+          height: headerLogoSize,
+        }),
+      );
+      titleX = margin + logoWidth + 14;
+    }
+
+    header.add(
+      new Konva.Text({
+        x: titleX,
+        y: 11,
+        text: i18n._(msg`Signing Certificate`),
+        fontFamily: fontStack,
+        fontSize: 19,
+        fontStyle: '700',
+        fill: brandNavy,
+      }),
+    );
+
+    header.add(
+      new Konva.Text({
+        x: titleX,
+        y: 37,
+        text: 'Xenvera Innovation (HK) Limited',
+        fontFamily: fontStack,
+        fontSize: 9,
+        fontStyle: fontMedium,
+        fill: textMutedForeground,
+      }),
+    );
+
+    // Navy accent rule under the header.
+    header.add(
+      new Konva.Rect({
+        x: margin,
+        y: headerRuleY,
+        width: pageWidth - margin * 2,
+        height: 2,
+        fill: brandNavy,
+        cornerRadius: 1,
+      }),
+    );
+    header.add(
+      new Konva.Rect({
+        x: margin,
+        y: headerRuleY + 3,
+        width: pageWidth - margin * 2,
+        height: 1,
+        fill: brandNavySoft,
+      }),
+    );
+
+    return header;
+  };
+
   const pages: Uint8Array[] = [];
 
   let isQrPlaced = false;
@@ -771,23 +854,14 @@ export async function renderCertificate({
 
     const group = new Konva.Group();
 
-    const titleText = new Konva.Text({
-      x: margin,
-      y: 0,
-      height: pageTopMargin,
-      verticalAlign: 'middle',
-      text: i18n._(msg`Signing Certificate`),
-      fontFamily: fontStack,
-      fontSize: titleFontSize,
-      fontStyle: '700',
-    });
+    const headerGroup = buildHeader();
 
     table.setAttrs({
       x: margin,
       y: pageTopMargin,
     } satisfies Partial<Konva.GroupConfig>);
 
-    group.add(titleText);
+    group.add(headerGroup);
     group.add(table);
 
     // Add QR code and branding on the last page if there is space.
