@@ -31,7 +31,10 @@ export const TemplateDocumentInvite = ({
   includeSenderDetails,
   organisationType,
 }: TemplateDocumentInviteProps) => {
-  const { _ } = useLingui();
+  const { _, i18n } = useLingui();
+
+  // Chinese documents get a bilingual email; other languages get English.
+  const isZh = i18n.locale.toLowerCase().startsWith('zh');
 
   const { actionVerb } = RECIPIENT_ROLES_DESCRIPTION[role];
 
@@ -76,20 +79,21 @@ export const TemplateDocumentInvite = ({
         </Text>
 
         <Text className="mx-auto mt-1 mb-0 text-center text-muted-foreground text-sm">
-          Xenvera Innovation · 电子签署 E-Signature
+          {isZh ? 'Xenvera Innovation · 电子签署 E-Signature' : 'Xenvera Innovation · E-Signature'}
         </Text>
 
-        {/* Bilingual (中/EN) instruction line — Xenvera suppliers span both. */}
-        <Text className="my-1 text-center text-base text-muted-foreground">
-          {match(role)
-            .with(RecipientRole.SIGNER, () => '请点击下方按钮查看并签署文件。')
-            .with(RecipientRole.VIEWER, () => '请点击下方按钮查看文件。')
-            .with(RecipientRole.APPROVER, () => '请点击下方按钮查看并批准文件。')
-            .with(RecipientRole.CC, () => '')
-            .with(RecipientRole.ASSISTANT, () => '请点击下方按钮协助处理文件。')
-            .exhaustive()}
-        </Text>
-        <Text className="mt-0 mb-1 text-center text-muted-foreground text-sm">
+        {isZh && (
+          <Text className="my-1 text-center text-base text-muted-foreground">
+            {match(role)
+              .with(RecipientRole.SIGNER, () => '请点击下方按钮查看并签署文件。')
+              .with(RecipientRole.VIEWER, () => '请点击下方按钮查看文件。')
+              .with(RecipientRole.APPROVER, () => '请点击下方按钮查看并批准文件。')
+              .with(RecipientRole.CC, () => '')
+              .with(RecipientRole.ASSISTANT, () => '请点击下方按钮协助处理文件。')
+              .exhaustive()}
+          </Text>
+        )}
+        <Text className="mt-1 mb-1 text-center text-muted-foreground text-sm">
           {match(role)
             .with(RecipientRole.SIGNER, () => 'Please review and sign the document below.')
             .with(RecipientRole.VIEWER, () => 'Please review the document below.')
@@ -105,11 +109,11 @@ export const TemplateDocumentInvite = ({
             href={signDocumentLink}
           >
             {match(role)
-              .with(RecipientRole.SIGNER, () => '查看并签署 · View & Sign')
-              .with(RecipientRole.VIEWER, () => '查看文件 · View Document')
-              .with(RecipientRole.APPROVER, () => '查看并批准 · View & Approve')
+              .with(RecipientRole.SIGNER, () => (isZh ? '查看并签署 · View & Sign' : 'View & Sign'))
+              .with(RecipientRole.VIEWER, () => (isZh ? '查看文件 · View Document' : 'View Document'))
+              .with(RecipientRole.APPROVER, () => (isZh ? '查看并批准 · View & Approve' : 'View & Approve'))
               .with(RecipientRole.CC, () => '')
-              .with(RecipientRole.ASSISTANT, () => '协助处理 · Assist')
+              .with(RecipientRole.ASSISTANT, () => (isZh ? '协助处理 · Assist' : 'Assist'))
               .exhaustive()}
           </Button>
         </Section>

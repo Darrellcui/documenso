@@ -218,7 +218,6 @@ export async function renderCertificate({
   documentTitle,
   documentCreatedAt,
   qrToken,
-  hidePoweredBy,
   envelopeOwner,
   pageWidth,
   pageHeight,
@@ -491,7 +490,7 @@ export async function renderCertificate({
     const logoY = qrSize > 0 ? qrSize - 26 : 0;
 
     if (logoImage) {
-      const logoH = 26;
+      const logoH = 28;
       const logoW = logoH * (logoImage.width / logoImage.height);
 
       group.add(
@@ -503,20 +502,31 @@ export async function renderCertificate({
           height: logoH,
         }),
       );
+      // Two-line brand lockup: company name, then a small gray "Powered by".
       group.add(
         new Konva.Text({
           x: logoW + 10,
-          y: logoY + 8,
-          text: t('由 Xenvera Innovation (HK) Limited 提供', 'Provided by Xenvera Innovation (HK) Limited'),
+          y: logoY + 3,
+          text: 'Xenvera Innovation (HK) Limited',
           fontFamily: fontStack,
-          fontSize: 8,
-          fontStyle: fontMedium,
-          fill: textMuted,
+          fontSize: 9,
+          fontStyle: '700',
+          fill: brandNavy,
+        }),
+      );
+      group.add(
+        new Konva.Text({
+          x: logoW + 10,
+          y: logoY + 16,
+          text: 'Powered by Documenso',
+          fontFamily: fontStack,
+          fontSize: 7,
+          fill: textMutedLight,
         }),
       );
     }
 
-    return { group, height: Math.max(qrSize, 26) };
+    return { group, height: Math.max(qrSize, 28) };
   };
 
   // ---- Paginate the timeline ----
@@ -530,7 +540,9 @@ export async function renderCertificate({
   });
 
   const footer = await buildFooterBranding();
-  const footerBlockHeight = hidePoweredBy ? 0 : footer.height + 24;
+  // The certificate always shows the brand block + QR (the QR is required and
+  // the brand lockup includes the Powered-by line), regardless of hidePoweredBy.
+  const footerBlockHeight = footer.height + 24;
 
   // Page 1 has header; measure its consumed height with a scratch group.
   const scratch = new Konva.Group();
@@ -595,7 +607,7 @@ export async function renderCertificate({
     }
 
     // Footer branding on the last page.
-    if (index === pagesOfEvents.length - 1 && !hidePoweredBy) {
+    if (index === pagesOfEvents.length - 1) {
       footer.group.setAttrs({
         x: contentX,
         y: pageHeight - padBottom - footer.height,
@@ -608,7 +620,7 @@ export async function renderCertificate({
       new Konva.Text({
         x: contentX,
         y: pageHeight - frameInset - 16,
-        text: `Transaction ID: ${envelopeId}`,
+        text: `Transaction ID: ${envelopeId.replace(/^envelope_/, 'xenvera_')}`,
         fontFamily: fontStack,
         fontSize: 7,
         fill: textMutedLight,

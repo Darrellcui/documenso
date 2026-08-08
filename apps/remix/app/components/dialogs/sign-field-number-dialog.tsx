@@ -96,7 +96,7 @@ export const SignFieldNumberDialog = createCallable<SignFieldNumberDialogProps, 
 
     return (
       <Dialog open={true} onOpenChange={(value) => (!value ? call.end(null) : null)}>
-        <DialogContent>
+        <DialogContent className="dark-mode-disabled">
           <DialogHeader>
             <DialogTitle>{fieldMeta.label || <Trans>Enter Number</Trans>}</DialogTitle>
 

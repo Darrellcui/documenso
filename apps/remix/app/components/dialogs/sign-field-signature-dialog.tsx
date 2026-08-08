@@ -21,7 +21,7 @@ export const SignFieldSignatureDialog = createCallable<SignFieldSignatureDialogP
 
     return (
       <Dialog open={true} onOpenChange={(value) => (!value ? call.end(null) : null)}>
-        <DialogContent position="center">
+        <DialogContent position="center" className="dark-mode-disabled">
           <div>
             <DialogHeader>
               <DialogTitle>

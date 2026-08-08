@@ -146,25 +146,30 @@ export const run = async ({ payload, io }: { payload: TSendSigningEmailJobDefini
   const zhAction = zhActionByRole[recipient.role];
   const enAction = enActionByRole[recipient.role];
 
+  // Chinese documents get a bilingual subject; other languages get English.
+  const isZh = (emailLanguage ?? '').toLowerCase().startsWith('zh');
+
   let emailMessage = customEmail?.message || '';
-  let emailSubject = `请${zhAction}文件 · Please ${enAction} this document`;
+  let emailSubject = isZh ? `请${zhAction}文件 · Please ${enAction} this document` : `Please ${enAction} this document`;
 
   if (selfSigner) {
     emailMessage = i18n._(
       msg`You have initiated the document ${`"${envelope.title}"`} that requires you to ${recipientActionVerb} it.`,
     );
-    emailSubject = `请${zhAction}您的文件 · Please ${enAction} your document`;
+    emailSubject = isZh ? `请${zhAction}您的文件 · Please ${enAction} your document` : `Please ${enAction} your document`;
   }
 
   if (isDirectTemplate) {
     emailMessage = i18n._(
       msg`A document was created by your direct template that requires you to ${recipientActionVerb} it.`,
     );
-    emailSubject = `请${zhAction}文件 · Please ${enAction} this document`;
+    emailSubject = isZh ? `请${zhAction}文件 · Please ${enAction} this document` : `Please ${enAction} this document`;
   }
 
   if (organisationType === OrganisationType.ORGANISATION) {
-    emailSubject = `${team.name} 邀请您${zhAction}文件 · ${team.name} invited you to ${enAction} a document`;
+    emailSubject = isZh
+      ? `${team.name} 邀请您${zhAction}文件 · ${team.name} invited you to ${enAction} a document`
+      : `${team.name} invited you to ${enAction} a document`;
     emailMessage = customEmail?.message ?? '';
 
     if (!emailMessage) {

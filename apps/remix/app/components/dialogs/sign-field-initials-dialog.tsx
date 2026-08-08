@@ -36,7 +36,7 @@ export const SignFieldInitialsDialog = createCallable<SignFieldInitialsDialogPro
 
   return (
     <Dialog open={true} onOpenChange={(value) => (!value ? call.end(null) : null)}>
-      <DialogContent>
+      <DialogContent className="dark-mode-disabled">
         <DialogHeader>
           <DialogTitle>
             <Trans>Enter Initials</Trans>

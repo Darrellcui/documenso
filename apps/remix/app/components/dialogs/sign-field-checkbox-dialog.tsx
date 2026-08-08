@@ -73,7 +73,7 @@ export const SignFieldCheckboxDialog = createCallable<SignFieldCheckboxDialogPro
 
     return (
       <Dialog open={true} onOpenChange={(value) => (!value ? call.end(null) : null)}>
-        <DialogContent position="center">
+        <DialogContent position="center" className="dark-mode-disabled">
           <DialogHeader>
             <DialogTitle>{fieldMeta.label || <Trans>Select Options</Trans>}</DialogTitle>
 

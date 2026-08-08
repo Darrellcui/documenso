@@ -1,6 +1,5 @@
 import { DocumentCompletedEmailTemplate } from '@documenso/email/templates/document-completed';
 import { prisma } from '@documenso/prisma';
-import { msg } from '@lingui/core/macro';
 import { DocumentSource, EnvelopeType, RecipientRole } from '@prisma/client';
 import { createElement } from 'react';
 
@@ -83,6 +82,10 @@ export const run = async ({ payload, io }: { payload: TSendDocumentCompletedEmai
 
   const { user: owner } = envelope;
 
+  // Chinese documents get a bilingual subject; other languages get English.
+  const isZh = (emailLanguage ?? '').toLowerCase().startsWith('zh');
+  const completedSubject = isZh ? '签署完成 · Signing Complete' : 'Signing Complete';
+
   const completedDocumentEmailAttachments = await Promise.all(
     envelope.envelopeItems.map(async (envelopeItem) => {
       const file = await getFileServerSide(envelopeItem.documentData);
@@ -147,7 +150,7 @@ export const run = async ({ payload, io }: { payload: TSendDocumentCompletedEmai
       ],
       from: senderEmail,
       replyTo: replyToEmail,
-      subject: `签署完成 · Signing Complete`,
+      subject: completedSubject,
       html,
       text,
       attachments: completedDocumentEmailAttachments,
@@ -247,7 +250,7 @@ export const run = async ({ payload, io }: { payload: TSendDocumentCompletedEmai
         subject:
           isDirectTemplate && envelope.documentMeta?.subject
             ? renderCustomEmailTemplate(envelope.documentMeta.subject, customEmailTemplate)
-            : i18n._(msg`Signing Complete!`),
+            : completedSubject,
         html,
         text,
         attachments: completedDocumentEmailAttachments,

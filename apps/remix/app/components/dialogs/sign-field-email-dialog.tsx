@@ -38,7 +38,7 @@ export const SignFieldEmailDialog = createCallable<SignFieldEmailDialogProps, st
 
     return (
       <Dialog open={true} onOpenChange={(value) => (!value ? call.end(null) : null)}>
-        <DialogContent>
+        <DialogContent className="dark-mode-disabled">
           <DialogHeader>
             <DialogTitle>
               <Trans>Enter Email</Trans>
