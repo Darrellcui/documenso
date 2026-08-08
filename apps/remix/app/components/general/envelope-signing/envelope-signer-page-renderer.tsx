@@ -406,7 +406,11 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
                   actionTarget: field.type,
                 });
 
-                setSignature(payload.value);
+                // A stamp image must not become the reusable signature —
+                // otherwise the next signature field would reuse the stamp.
+                if (!isStampField) {
+                  setSignature(payload.value);
+                }
               } else {
                 await signField(field.id, payload);
               }
