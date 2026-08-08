@@ -11,20 +11,17 @@ import { getRecipientSignatures } from '@documenso/lib/server-only/recipient/get
 import { getUserByEmail } from '@documenso/lib/server-only/user/get-user-by-email';
 import { isDocumentCompleted } from '@documenso/lib/utils/document';
 import { trpc } from '@documenso/trpc/react';
-import { DocumentShareButton } from '@documenso/ui/components/document/document-share-button';
 import { SigningCard3D } from '@documenso/ui/components/signing-card';
 import { cn } from '@documenso/ui/lib/utils';
 import { Badge } from '@documenso/ui/primitives/badge';
 import { Button } from '@documenso/ui/primitives/button';
-import { useLingui } from '@lingui/react';
 import { Trans } from '@lingui/react/macro';
 import { DocumentStatus, FieldType, RecipientRole } from '@prisma/client';
 import { CheckCircle2, Clock8, DownloadIcon, Loader2 } from 'lucide-react';
-import { Link } from 'react-router';
+import { Link, redirect } from 'react-router';
 import { match } from 'ts-pattern';
 
 import { EnvelopeDownloadDialog } from '~/components/dialogs/envelope-download-dialog';
-import { ClaimAccount } from '~/components/general/claim-account';
 import { DocumentSigningAuthPageView } from '~/components/general/document-signing/document-signing-auth-page';
 import { RecipientBranding } from '~/components/general/recipient-branding';
 import { useCspNonce } from '~/utils/nonce';
@@ -75,6 +72,13 @@ export async function loader({ params, request }: Route.LoaderArgs) {
     } as const;
   }
 
+  // External signers (no account) are sent to the branded thank-you page
+  // instead of the built-in completion screen. Signed-in users (senders/admins)
+  // keep the full completion page with download.
+  if (!user) {
+    throw redirect('https://www.xenvera.com/thanks');
+  }
+
   const signatures = await getRecipientSignatures({ recipientId: recipient.id });
   const isExistingUser = await getUserByEmail({ email: recipient.email })
     .then((u) => !!u)
@@ -103,8 +107,6 @@ export async function loader({ params, request }: Route.LoaderArgs) {
 }
 
 export default function CompletedSigningPage({ loaderData }: Route.ComponentProps) {
-  const { _ } = useLingui();
-
   const { sessionData } = useOptionalSession();
   const user = sessionData?.user;
   const cspNonce = useCspNonce();
@@ -249,12 +251,6 @@ export default function CompletedSigningPage({ loaderData }: Route.ComponentProp
               ))}
 
             <div className="mt-8 flex w-full max-w-xs flex-col items-stretch gap-4 md:w-auto md:max-w-none md:flex-row md:items-center">
-              <DocumentShareButton
-                documentId={document.id}
-                token={recipient.token}
-                className="w-full max-w-none md:flex-1"
-              />
-
               {isDocumentCompleted(document) && (
                 <EnvelopeDownloadDialog
                   envelopeId={document.envelopeId}
@@ -280,21 +276,6 @@ export default function CompletedSigningPage({ loaderData }: Route.ComponentProp
             </div>
           </div>
 
-          <div className="flex flex-col items-center">
-            {canSignUp && (
-              <div className="flex max-w-xl flex-col items-center justify-center p-4 md:p-12">
-                <h2 className="mt-8 text-center font-semibold text-xl md:mt-0">
-                  <Trans>Need to sign documents?</Trans>
-                </h2>
-
-                <p className="mt-4 max-w-[55ch] text-center text-muted-foreground/60 leading-normal">
-                  <Trans>Create your account and start using state-of-the-art document signing.</Trans>
-                </p>
-
-                <ClaimAccount defaultName={recipientName} defaultEmail={recipient.email} />
-              </div>
-            )}
-          </div>
         </div>
       </div>
     </>
