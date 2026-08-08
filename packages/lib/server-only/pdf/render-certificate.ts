@@ -15,7 +15,7 @@ import { renderSVG } from 'uqr';
 import { NEXT_PUBLIC_WEBAPP_URL } from '../../constants/app';
 import { APP_I18N_OPTIONS } from '../../constants/i18n';
 import { getSignatureFontFamily } from '../../constants/pdf';
-import { RECIPIENT_ROLE_SIGNING_REASONS, RECIPIENT_ROLES_DESCRIPTION } from '../../constants/recipient-roles';
+import { RECIPIENT_ROLES_DESCRIPTION } from '../../constants/recipient-roles';
 import type { TDocumentAuditLogBaseSchema } from '../../types/document-audit-logs';
 import { svgToPng } from '../../utils/images/svg-to-png';
 import { ensureFontLibrary } from './helpers';
@@ -468,17 +468,14 @@ const renderColumnThree = (options: RenderColumnOptions) => {
     });
   }
 
-  const isOwner = recipient.email.toLowerCase() === envelopeOwner.email.toLowerCase();
-
-  itemsToRender.push({
-    label: i18n._(msg`Reason`),
-    value:
-      recipient.signingStatus === SigningStatus.REJECTED
-        ? recipient.rejectionReason || ''
-        : isOwner
-          ? i18n._(msg`I am the owner of this document`)
-          : i18n._(RECIPIENT_ROLE_SIGNING_REASONS[recipient.role]),
-  });
+  // Only surface a reason when it carries real information (a rejection).
+  // The boilerplate "I am the signer of this document" reason is omitted.
+  if (recipient.signingStatus === SigningStatus.REJECTED && recipient.rejectionReason) {
+    itemsToRender.push({
+      label: i18n._(msg`Reason`),
+      value: recipient.rejectionReason,
+    });
+  }
 
   for (const [index, item] of itemsToRender.entries()) {
     const labelAndText = renderLabelAndText({

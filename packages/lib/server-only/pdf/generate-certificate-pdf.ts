@@ -30,7 +30,7 @@ export type GenerateCertificatePdfOptions = {
     email: string;
   };
   recipients: Recipient[];
-  fields: (Pick<Field, 'id' | 'type' | 'secondaryId' | 'recipientId'> & {
+  fields: (Pick<Field, 'id' | 'type' | 'secondaryId' | 'recipientId' | 'fieldMeta'> & {
     signature?: Pick<Signature, 'signatureImageAsBase64' | 'typedSignature'> | null;
   })[];
   language?: string;
@@ -60,9 +60,20 @@ export const generateCertificatePdf = async (options: GenerateCertificatePdfOpti
     recipients: recipients.map((recipient) => {
       const recipientId = recipient.id;
 
-      const signatureField = fields.find(
+      // The certificate's signature column should show the person's signature,
+      // not a company stamp/seal. Stamp fields are SIGNATURE fields flagged via
+      // fieldMeta.stamp, so prefer a signed non-stamp signature; fall back to a
+      // signed stamp only when that's the only mark, then to any signature field.
+      const recipientSignatureFields = fields.filter(
         (field) => field.recipientId === recipient.id && field.type === FieldType.SIGNATURE,
       );
+      const isStampField = (field: (typeof recipientSignatureFields)[number]) =>
+        (field.fieldMeta as { stamp?: boolean } | null)?.stamp === true;
+      const signatureField =
+        recipientSignatureFields.find((field) => !isStampField(field) && field.signature) ??
+        recipientSignatureFields.find((field) => field.signature) ??
+        recipientSignatureFields.find((field) => !isStampField(field)) ??
+        recipientSignatureFields[0];
 
       const emailSent: TDocumentAuditLogBaseSchema | undefined = auditLogs['EMAIL_SENT'].find(
         (log) => log.type === 'EMAIL_SENT' && log.data.recipientId === recipientId,
