@@ -72,36 +72,44 @@ const CertificateVerifiedSummary = ({
   const isZh = i18n.locale.toLowerCase().startsWith('zh');
 
   return (
-    <div className="w-full rounded-2xl border border-border bg-card p-6 shadow-sm">
-      {/* Brand lockup: logo + full company name. */}
-      <div className="mb-5 flex items-center justify-between gap-4 border-border border-b pb-4">
-        <div className="flex items-center gap-2.5">
-          <img src="/xenvera.svg" alt="Xenvera" className="h-8 w-8" />
-          <span className="font-semibold text-base text-foreground">Xenvera Innovation (HK) Limited</span>
-        </div>
-        {downloadSlot}
-      </div>
-
-      <div className="flex items-start gap-3">
-        <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-          <CheckCircle2 className="h-6 w-6" />
-        </div>
-        <div className="space-y-1">
-          <h1 className="font-semibold text-foreground text-xl leading-tight">{title}</h1>
-          <p className="text-muted-foreground text-sm">
-            {isZh
-              ? '此文件已通过 Xenvera Innovation 电子签署验证并完成'
-              : 'Verified & completed via Xenvera Innovation e-signature'}
-          </p>
+    <div className="w-full">
+      {/* Brand lockup — outside the box: logo + company name on one line,
+          "Powered by Documenso" as a small gray line beneath. */}
+      <div className="mb-4 flex items-center gap-2.5">
+        <img src="/xenvera.svg" alt="Xenvera" className="h-9 w-9 shrink-0" />
+        <div className="leading-tight">
+          <div className="font-semibold text-base text-foreground">Xenvera Innovation (HK) Limited</div>
+          <div className="text-muted-foreground text-xs">Powered by Documenso</div>
         </div>
       </div>
 
-      <dl className="mt-5 grid grid-cols-2 gap-4 border-border border-t pt-5 sm:grid-cols-4">
-        <SummaryField label={<Trans>Status</Trans>} value={<Trans>Completed</Trans>} />
-        <SummaryField label={<Trans>Completed on</Trans>} value={formattedDate || '—'} />
-        <SummaryField label={<Trans>Recipients</Trans>} value={recipientCount} />
-        <SummaryField label={isZh ? '签名 ID' : 'Signature ID'} value={signatureId || '—'} />
-      </dl>
+      {/* Box — only the signed document's information. */}
+      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+          <div className="flex items-start gap-3">
+            <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <CheckCircle2 className="h-6 w-6" />
+            </div>
+            <div className="space-y-1">
+              <h1 className="break-words font-semibold text-foreground text-lg leading-tight sm:text-xl">{title}</h1>
+              <p className="text-muted-foreground text-sm">
+                {isZh
+                  ? '此文件已通过 Xenvera Innovation 电子签署验证并完成'
+                  : 'Verified & completed via Xenvera Innovation e-signature'}
+              </p>
+            </div>
+          </div>
+
+          {downloadSlot}
+        </div>
+
+        <dl className="mt-5 grid grid-cols-2 gap-4 border-border border-t pt-5 sm:grid-cols-4">
+          <SummaryField label={<Trans>Status</Trans>} value={<Trans>Completed</Trans>} />
+          <SummaryField label={<Trans>Completed on</Trans>} value={formattedDate || '—'} />
+          <SummaryField label={<Trans>Recipients</Trans>} value={recipientCount} />
+          <SummaryField label={isZh ? '签名 ID' : 'Signature ID'} value={signatureId || '—'} />
+        </dl>
+      </div>
     </div>
   );
 };
