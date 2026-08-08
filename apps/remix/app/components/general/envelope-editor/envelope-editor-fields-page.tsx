@@ -148,11 +148,20 @@ export const EnvelopeEditorFieldsPage = () => {
       return;
     }
 
-    const isMetaSame = isDeepEqual(selectedField.fieldMeta, fieldMeta);
+    // The signature settings sub-form doesn't expose the stamp flag, so it
+    // emits meta without it. Carry the flag over so editing font size etc.
+    // never silently turns a stamp field back into a signature field.
+    const existingMeta = selectedField.fieldMeta;
+    const nextMeta =
+      existingMeta?.type === 'signature' && existingMeta.stamp && fieldMeta?.type === 'signature'
+        ? { ...fieldMeta, stamp: true }
+        : fieldMeta;
+
+    const isMetaSame = isDeepEqual(selectedField.fieldMeta, nextMeta);
 
     if (!isMetaSame) {
       editorFields.updateFieldByFormId(selectedField.formId, {
-        fieldMeta,
+        fieldMeta: nextMeta,
       });
     }
   };
