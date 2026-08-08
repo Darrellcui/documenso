@@ -70,6 +70,14 @@ export const DocumentSigningSignatureField = ({
 
   const { signature } = field;
 
+  // A stamp is a signature field flagged in its fieldMeta. It must stay fully
+  // isolated from the reusable handwritten signature: never prefilled from it,
+  // never written back to it, and always uploaded fresh as an image — otherwise
+  // uploading a stamp overwrites the shared signature and later signature
+  // fields render the stamp image.
+  const fieldMeta = field.fieldMeta as { type?: string; stamp?: boolean } | null | undefined;
+  const isStamp = fieldMeta?.type === 'signature' && fieldMeta.stamp === true;
+
   const isLoading = isSignFieldWithTokenLoading || isRemoveSignedFieldWithTokenLoading;
 
   const [showSignatureModal, setShowSignatureModal] = useState(false);
@@ -88,7 +96,8 @@ export const DocumentSigningSignatureField = ({
   }, [field.inserted, signature?.signatureImageAsBase64]);
 
   const onPreSign = () => {
-    if (!providedSignature) {
+    // Stamp fields never reuse the stored signature — always upload fresh.
+    if (isStamp || !providedSignature) {
       setShowSignatureModal(true);
       return false;
     }
@@ -100,7 +109,12 @@ export const DocumentSigningSignatureField = ({
    */
   const onDialogSignClick = () => {
     setShowSignatureModal(false);
-    setProvidedSignature(localSignature);
+
+    // A stamp image must not become the reusable signature, or the next
+    // signature field would render the stamp.
+    if (!isStamp) {
+      setProvidedSignature(localSignature);
+    }
 
     if (!localSignature) {
       return;
@@ -114,7 +128,8 @@ export const DocumentSigningSignatureField = ({
 
   const onSign = async (authOptions?: TRecipientActionAuth, signature?: string) => {
     try {
-      const value = signature || providedSignature;
+      // Stamp fields never fall back to the shared signature.
+      const value = signature || (isStamp ? undefined : providedSignature);
 
       if (!value) {
         setShowSignatureModal(true);
@@ -276,9 +291,9 @@ export const DocumentSigningSignatureField = ({
             fullName={fullName}
             value={localSignature ?? ''}
             onChange={({ value }) => setLocalSignature(value)}
-            typedSignatureEnabled={typedSignatureEnabled}
-            uploadSignatureEnabled={uploadSignatureEnabled}
-            drawSignatureEnabled={drawSignatureEnabled}
+            typedSignatureEnabled={isStamp ? false : typedSignatureEnabled}
+            uploadSignatureEnabled={isStamp ? true : uploadSignatureEnabled}
+            drawSignatureEnabled={isStamp ? false : drawSignatureEnabled}
           />
 
           <DocumentSigningDisclosure />
