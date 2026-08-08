@@ -196,7 +196,21 @@ const buildTimelineEvents = (options: {
     .map(({ event }) => event);
 };
 
-const ellipsize = (value: string, max: number) => (value.length > max ? `${value.slice(0, max - 1)}…` : value);
+// Shrink the font size until the text fits within maxWidth, so the full title
+// always shows: default size when it fits, smaller only when it's too long.
+const fitFontSize = (text: string, maxWidth: number, baseSize: number, minSize: number, fontStyle = 'normal') => {
+  for (let size = baseSize; size > minSize; size -= 1) {
+    const probe = new Konva.Text({ text, fontFamily: fontStack, fontSize: size, fontStyle });
+    const width = probe.width();
+    probe.destroy();
+
+    if (width <= maxWidth) {
+      return size;
+    }
+  }
+
+  return minSize;
+};
 
 export async function renderCertificate({
   recipients,
@@ -273,13 +287,17 @@ export async function renderCertificate({
   // Header + document details (page 1 only). Returns the y where the timeline
   // can start.
   const buildHeader = (group: Konva.Group) => {
+    const titleText = documentTitle || envelopeId;
+    const titleWidth = contentWidth - 130;
+    const titleFontSize = fitFontSize(titleText, titleWidth, 20, 11, '700');
+
     const title = new Konva.Text({
       x: contentX,
       y: padTop,
-      text: ellipsize(documentTitle || envelopeId, 48),
-      width: contentWidth - 130,
+      text: titleText,
+      width: titleWidth,
       fontFamily: fontStack,
-      fontSize: 20,
+      fontSize: titleFontSize,
       fontStyle: '700',
       fill: brandNavy,
       wrap: 'none',
@@ -372,17 +390,23 @@ export async function renderCertificate({
     // Section title for the activity log.
     const sectionY = boxY + boxHeight + 26;
 
+    const sectionText = isZh
+      ? `「${documentTitle || envelopeId}」操作记录`
+      : `Activity — ${documentTitle || envelopeId}`;
+    const sectionFontSize = fitFontSize(sectionText, contentWidth, 13, 9, '700');
+
     group.add(
       new Konva.Text({
         x: contentX,
         y: sectionY,
-        text: isZh
-          ? `「${ellipsize(documentTitle || envelopeId, 30)}」操作记录`
-          : `Activity — ${ellipsize(documentTitle || envelopeId, 30)}`,
+        width: contentWidth,
+        text: sectionText,
         fontFamily: fontStack,
-        fontSize: 13,
+        fontSize: sectionFontSize,
         fontStyle: '700',
         fill: brandNavy,
+        wrap: 'none',
+        ellipsis: true,
       }),
     );
 

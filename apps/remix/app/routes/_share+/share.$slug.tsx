@@ -86,6 +86,7 @@ export default function SharePage() {
         envelopeItems={document.envelopeItems}
         recipientCount={document.recipientCount}
         completedDate={document.completedAt ?? undefined}
+        signatureId={document.signatureId ?? undefined}
         token={token}
       />
     );

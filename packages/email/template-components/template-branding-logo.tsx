@@ -25,7 +25,11 @@ export const TemplateBrandingLogo = ({ assetBaseUrl, className = 'mb-4 h-6' }: T
     return <Img src={documensoLogoUrl} alt="Documenso Logo" className={className} />;
   }
 
-  const brandingLogo = <Img src={branding.brandingLogo} alt="Branding Logo" className={className} />;
+  // Custom company logos read too small at the shared h-6 size, so render them
+  // larger (and cap the width so a wide logo can't overflow the email).
+  const brandingLogoClassName = `${className.replace(/\bh-\d+\b/, 'h-12')} max-w-[240px]`;
+
+  const brandingLogo = <Img src={branding.brandingLogo} alt="Branding Logo" className={brandingLogoClassName} />;
 
   const safeBrandingUrl = getSafeBrandingUrl(branding.brandingUrl);
 

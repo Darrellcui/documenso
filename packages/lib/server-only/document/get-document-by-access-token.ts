@@ -1,5 +1,5 @@
 import { prisma } from '@documenso/prisma';
-import { DocumentStatus, EnvelopeType } from '@prisma/client';
+import { DocumentStatus, EnvelopeType, FieldType } from '@prisma/client';
 
 import { mapSecondaryIdToDocumentId } from '../../utils/envelope';
 
@@ -47,6 +47,12 @@ export const getDocumentByAccessToken = async ({ token }: GetDocumentByAccessTok
           },
         },
       },
+      fields: {
+        where: { type: FieldType.SIGNATURE, signature: { isNot: null } },
+        select: { secondaryId: true },
+        orderBy: { id: 'asc' },
+        take: 1,
+      },
       _count: {
         select: {
           recipients: true,
@@ -77,5 +83,6 @@ export const getDocumentByAccessToken = async ({ token }: GetDocumentByAccessTok
     envelopeItems: result.envelopeItems,
     recipientCount: result._count.recipients,
     documentTeamUrl: result.team.url,
+    signatureId: result.fields[0]?.secondaryId?.toUpperCase() ?? null,
   };
 };
