@@ -82,6 +82,13 @@ const textSm = 9;
 const textXs = 8;
 const fontMedium = '500';
 
+// Font stack with CJK fallback. Inter has no CJK glyphs, so Chinese/Japanese/
+// Korean labels rendered as tofu boxes on the certificate page. skia-canvas
+// falls through this list per-glyph; the bundled Noto Sans CJK fonts cover the
+// missing ranges. Multi-word families are quoted so the CSS font shorthand
+// parses correctly.
+const fontStack = 'Inter, "Noto Sans", "Noto Sans Chinese", "Noto Sans Japanese", "Noto Sans Korean"';
+
 const columnWidthPercentages = [30, 30, 40];
 const rowPadding = 12;
 const tableHeaderHeight = 38;
@@ -115,7 +122,7 @@ const renderLabelAndText = (options: RenderLabelAndTextOptions) => {
     y: 0,
     text: `${options.label}: `,
     fontStyle: fontMedium,
-    fontFamily: 'Inter',
+    fontFamily: fontStack,
     fill: labelFill,
     fontSize: textSm,
   });
@@ -126,7 +133,7 @@ const renderLabelAndText = (options: RenderLabelAndTextOptions) => {
     x: label.width(),
     y: 0,
     width: width - label.width(),
-    fontFamily: 'Inter',
+    fontFamily: fontStack,
     text: options.text,
     fill: valueFill,
     wrap: 'char',
@@ -153,7 +160,7 @@ const renderRowHeader = (options: RenderRowHeaderOptions) => {
   const headerRow = new Konva.Group();
 
   const headerFontStyling = {
-    fontFamily: 'Inter',
+    fontFamily: fontStack,
     fontSize: 11,
     fontStyle: fontMedium,
     verticalAlign: 'middle',
@@ -209,7 +216,7 @@ const renderColumnOne = (options: RenderColumnOptions) => {
 
   const textFontStyling = {
     x: 0,
-    fontFamily: 'Inter',
+    fontFamily: fontStack,
     wrap: 'char',
     lineHeight: 1.2,
     fill: textMutedForeground,
@@ -355,7 +362,7 @@ const renderColumnTwo = (options: RenderColumnOptions) => {
       text: `${i18n._(msg`Signature ID`)}:`,
       fill: textMutedForeground,
       width: columnWidth,
-      fontFamily: 'Inter',
+      fontFamily: fontStack,
       fontSize: textSm,
       fontStyle: fontMedium,
       lineHeight: 1.4,
@@ -379,7 +386,7 @@ const renderColumnTwo = (options: RenderColumnOptions) => {
       y: 0,
       text: 'N/A',
       fill: textMutedForeground,
-      fontFamily: 'Inter',
+      fontFamily: fontStack,
       fontSize: textSm,
     });
     column.add(naText);
@@ -573,7 +580,7 @@ const renderBranding = async ({ qrToken, i18n }: { qrToken: string | null; i18n:
     verticalAlign: 'middle',
     text: i18n._(msg`Signing certificate provided by`) + ':',
     fontStyle: fontMedium,
-    fontFamily: 'Inter',
+    fontFamily: fontStack,
     fontSize: textSm,
     height: brandingHeight,
   });
@@ -773,7 +780,7 @@ export async function renderCertificate({
       height: pageTopMargin,
       verticalAlign: 'middle',
       text: i18n._(msg`Signing Certificate`),
-      fontFamily: 'Inter',
+      fontFamily: fontStack,
       fontSize: titleFontSize,
       fontStyle: '700',
     });
@@ -805,7 +812,7 @@ export async function renderCertificate({
       x: margin,
       y: pageHeight - textXs - 10,
       text: `${i18n._(msg`Envelope ID`)}: ${envelopeId}`,
-      fontFamily: 'Inter',
+      fontFamily: fontStack,
       fontSize: textXs,
       fill: textMutedForegroundLight,
     });
@@ -833,7 +840,7 @@ export async function renderCertificate({
       x: margin,
       y: pageHeight - textXs - 10,
       text: `${i18n._(msg`Envelope ID`)}: ${envelopeId}`,
-      fontFamily: 'Inter',
+      fontFamily: fontStack,
       fontSize: textXs,
       fill: textMutedForegroundLight,
     });

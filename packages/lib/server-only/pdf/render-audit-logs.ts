@@ -54,6 +54,10 @@ const textSm = 9;
 const textXs = 8;
 const fontMedium = '500';
 
+// Font stack with CJK fallback (see render-certificate.ts) so Chinese/Japanese/
+// Korean labels and names render instead of tofu boxes.
+const fontStack = 'Inter, "Noto Sans", "Noto Sans Chinese", "Noto Sans Japanese", "Noto Sans Korean"';
+
 const pageTopMargin = 60;
 const pageBottomMargin = 27;
 const contentMaxWidth = 768;
@@ -81,7 +85,7 @@ const renderOverviewCardLabels = (options: RenderOverviewCardLabelAndTextOptions
     y: 0,
     text: options.label,
     fontStyle: fontMedium,
-    fontFamily: 'Inter',
+    fontFamily: fontStack,
     fill: textForeground,
     fontSize: textSm,
   });
@@ -93,7 +97,7 @@ const renderOverviewCardLabels = (options: RenderOverviewCardLabelAndTextOptions
       x: 0,
       y: label.height() + labelYSpacing,
       width: width - label.width(),
-      fontFamily: 'Inter',
+      fontFamily: fontStack,
       text,
       fill: textForeground,
       wrap: 'char',
@@ -107,7 +111,7 @@ const renderOverviewCardLabels = (options: RenderOverviewCardLabelAndTextOptions
         x: 0,
         y: group.getClientRect().height + 4,
         width: width - label.width(),
-        fontFamily: 'Inter',
+        fontFamily: fontStack,
         text: '• ' + textValue,
         fill: textForeground,
         wrap: 'char',
@@ -141,7 +145,7 @@ const renderVerticalLabelAndText = (options: RenderVerticalLabelAndTextOptions) 
 
   const konvaLabel = new Konva.Text({
     align: align ?? 'left',
-    fontFamily: 'Inter',
+    fontFamily: fontStack,
     width,
     text: label,
     fontSize: textXs,
@@ -329,7 +333,7 @@ const renderRow = (options: RenderRowOptions) => {
     y: 0,
     width: columnWidth - indicatorWidth - indicatorPaddingRight,
     text: auditLog.type.replace(/_/g, ' '),
-    fontFamily: 'Inter',
+    fontFamily: fontStack,
     fontSize: textSm,
     fontStyle: fontMedium,
     fill: textMutedForeground,
@@ -340,7 +344,7 @@ const renderRow = (options: RenderRowOptions) => {
     y: auditLogTypeText.height() + 4,
     width: columnWidth - indicatorWidth - indicatorPaddingRight,
     text: formatDocumentAuditLogAction(i18n, auditLog).description,
-    fontFamily: 'Inter',
+    fontFamily: fontStack,
     fontSize: textSm,
     fill: textForeground,
   });
@@ -349,7 +353,7 @@ const renderRow = (options: RenderRowOptions) => {
     x: columnWidth + columnSpacing,
     width: columnWidth,
     text: DateTime.fromJSDate(auditLog.createdAt).setLocale(APP_I18N_OPTIONS.defaultLocale).toLocaleString(dateFormat),
-    fontFamily: 'Inter',
+    fontFamily: fontStack,
     align: 'right',
     fontSize: textSm,
     fill: textMutedForeground,
@@ -525,7 +529,7 @@ const renderPages = (options: RenderPagesOptions) => {
       verticalAlign: 'middle',
       text: i18n._(msg`Audit Log`),
       fill: textForeground,
-      fontFamily: 'Inter',
+      fontFamily: fontStack,
       fontSize: titleFontSize,
       fontStyle: '700',
     });
@@ -620,7 +624,7 @@ export async function renderAuditLogs({
       x: margin,
       y: pageHeight - textXs - 10,
       text: `${i18n._(msg`Envelope ID`)}: ${envelope.id}`,
-      fontFamily: 'Inter',
+      fontFamily: fontStack,
       fontSize: textXs,
       fill: textMutedForegroundLight,
     });
@@ -665,7 +669,7 @@ export async function renderAuditLogs({
       x: margin,
       y: pageHeight - textXs - 10,
       text: `${i18n._(msg`Envelope ID`)}: ${envelope.id}`,
-      fontFamily: 'Inter',
+      fontFamily: fontStack,
       fontSize: textXs,
       fill: textMutedForegroundLight,
     });
