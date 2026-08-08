@@ -148,6 +148,8 @@ export const generateCertificatePdf = async (options: GenerateCertificatePdfOpti
     }),
     envelopeOwner,
     envelopeId: envelope.id,
+    documentTitle: envelope.title,
+    documentCreatedAt: envelope.createdAt,
     qrToken: envelope.qrToken,
     hidePoweredBy: organisationClaim.flags.hidePoweredBy ?? false,
     pageWidth,
