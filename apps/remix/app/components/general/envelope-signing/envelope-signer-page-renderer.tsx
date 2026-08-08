@@ -377,13 +377,17 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
          * SIGNATURE FIELD.
          */
         .with({ type: FieldType.SIGNATURE }, (field) => {
+          // Stamp fields always prompt for an image upload and never reuse
+          // the signer's stored handwritten signature.
+          const isStampField = field.fieldMeta?.type === 'signature' && field.fieldMeta.stamp === true;
+
           void handleSignatureFieldClick({
             field,
             fullName: fullName.current,
-            signature: signature.current,
-            typedSignatureEnabled: envelope.documentMeta.typedSignatureEnabled,
-            uploadSignatureEnabled: envelope.documentMeta.uploadSignatureEnabled,
-            drawSignatureEnabled: envelope.documentMeta.drawSignatureEnabled,
+            signature: isStampField ? null : signature.current,
+            typedSignatureEnabled: isStampField ? false : envelope.documentMeta.typedSignatureEnabled,
+            uploadSignatureEnabled: isStampField ? true : envelope.documentMeta.uploadSignatureEnabled,
+            drawSignatureEnabled: isStampField ? false : envelope.documentMeta.drawSignatureEnabled,
           })
             .then(async (payload) => {
               if (!payload) {

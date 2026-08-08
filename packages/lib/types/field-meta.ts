@@ -181,6 +181,10 @@ export type TDropdownFieldMeta = z.infer<typeof ZDropdownFieldMeta>;
 export const ZSignatureFieldMeta = ZBaseFieldMeta.extend({
   type: z.literal('signature'),
   overflow: ZFieldOverflowMode.optional().default(DEFAULT_SIGNATURE_OVERFLOW_MODE),
+  // Marks this signature field as a stamp/seal field. The signing UI only
+  // offers image upload for it and never reuses the signer's stored
+  // handwritten signature.
+  stamp: z.boolean().optional(),
 });
 
 export type TSignatureFieldMeta = z.infer<typeof ZSignatureFieldMeta>;

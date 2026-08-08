@@ -8,7 +8,7 @@ import { canRecipientFieldsBeModified } from '@documenso/lib/utils/recipients';
 import { SignatureIcon } from '@documenso/ui/icons/signature';
 import { getRecipientColorStyles } from '@documenso/ui/lib/recipient-colors';
 import { cn } from '@documenso/ui/lib/utils';
-import { FRIENDLY_FIELD_TYPE } from '@documenso/ui/primitives/document-flow/types';
+import type { MessageDescriptor } from '@lingui/core';
 import { msg } from '@lingui/core/macro';
 import { useLingui } from '@lingui/react/macro';
 import { FieldType } from '@prisma/client';
@@ -20,9 +20,11 @@ import {
   HashIcon,
   ListIcon,
   MailIcon,
+  StampIcon,
   TextIcon,
   UserIcon,
 } from 'lucide-react';
+import type { ComponentType } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 const MIN_HEIGHT_PX = 12;
@@ -31,12 +33,31 @@ const MIN_WIDTH_PX = 36;
 const DEFAULT_HEIGHT_PX = MIN_HEIGHT_PX * 2.5;
 const DEFAULT_WIDTH_PX = MIN_WIDTH_PX * 2.5;
 
-export const fieldButtonList = [
+// Stamp fields default to a square footprint.
+const STAMP_SIZE_PX = MIN_WIDTH_PX * 2.5;
+
+type FieldButton = {
+  type: FieldType;
+  icon: ComponentType<{ className?: string }>;
+  name: MessageDescriptor;
+  className?: string;
+  stamp?: boolean;
+};
+
+export const fieldButtonList: FieldButton[] = [
   {
     type: FieldType.SIGNATURE,
     icon: SignatureIcon,
     name: msg`Signature`,
     className: 'font-signature text-lg',
+  },
+  {
+    // Stamp/seal field — a SIGNATURE field flagged via fieldMeta so the
+    // signing UI only offers image upload.
+    type: FieldType.SIGNATURE,
+    stamp: true,
+    icon: StampIcon,
+    name: msg`Stamp`,
   },
   {
     type: FieldType.EMAIL,
@@ -98,7 +119,8 @@ export const EnvelopeEditorFieldDragDrop = ({
 
   const { t } = useLingui();
 
-  const [selectedField, setSelectedField] = useState<FieldType | null>(null);
+  const [selectedField, setSelectedField] = useState<FieldButton | null>(null);
+  const selectedFieldRef = useRef<FieldButton | null>(null);
 
   const { isWithinPageBounds, getPage } = useDocumentElement();
 
@@ -175,17 +197,24 @@ export const EnvelopeEditorFieldDragDrop = ({
       pageX -= fieldPageWidth / 2;
       pageY -= fieldPageHeight / 2;
 
+      const fieldMeta = structuredClone(FIELD_META_DEFAULT_VALUES[selectedField.type]);
+
+      // Stamp buttons drop a SIGNATURE field flagged as a stamp in its meta.
+      if (selectedField.stamp && fieldMeta?.type === 'signature') {
+        fieldMeta.stamp = true;
+      }
+
       const field = {
         formId: nanoid(12),
         envelopeItemId: selectedEnvelopeItemId,
-        type: selectedField,
+        type: selectedField.type,
         page: pageNumber,
         positionX: pageX,
         positionY: pageY,
         width: fieldPageWidth,
         height: fieldPageHeight,
         recipientId: selectedRecipientId,
-        fieldMeta: structuredClone(FIELD_META_DEFAULT_VALUES[selectedField]),
+        fieldMeta,
       };
 
       editorFields.addField(field);
@@ -197,6 +226,14 @@ export const EnvelopeEditorFieldDragDrop = ({
   );
 
   useEffect(() => {
+    selectedFieldRef.current = selectedField;
+
+    fieldBounds.current = selectedField?.stamp
+      ? { height: STAMP_SIZE_PX, width: STAMP_SIZE_PX }
+      : { height: DEFAULT_HEIGHT_PX, width: DEFAULT_WIDTH_PX };
+  }, [selectedField]);
+
+  useEffect(() => {
     const observer = new MutationObserver((_mutations) => {
       const $page = document.querySelector(PDF_VIEWER_PAGE_SELECTOR);
 
@@ -204,10 +241,9 @@ export const EnvelopeEditorFieldDragDrop = ({
         return;
       }
 
-      fieldBounds.current = {
-        height: Math.max(DEFAULT_HEIGHT_PX),
-        width: Math.max(DEFAULT_WIDTH_PX),
-      };
+      fieldBounds.current = selectedFieldRef.current?.stamp
+        ? { height: STAMP_SIZE_PX, width: STAMP_SIZE_PX }
+        : { height: Math.max(DEFAULT_HEIGHT_PX), width: Math.max(DEFAULT_WIDTH_PX) };
     });
 
     observer.observe(document.body, {
@@ -243,11 +279,11 @@ export const EnvelopeEditorFieldDragDrop = ({
         {fieldButtonList.map((field) => (
           <button
             disabled={isFieldsDisabled}
-            key={field.type}
+            key={`${field.type}${field.stamp ? '-stamp' : ''}`}
             type="button"
-            onClick={() => setSelectedField(field.type)}
-            onMouseDown={() => setSelectedField(field.type)}
-            data-selected={selectedField === field.type ? true : undefined}
+            onClick={() => setSelectedField(field)}
+            onMouseDown={() => setSelectedField(field)}
+            data-selected={selectedField === field ? true : undefined}
             className={cn(
               'group flex h-12 cursor-pointer items-center justify-center rounded-lg border border-border px-4 transition-colors',
               selectedRecipientStyles.fieldButton,
@@ -260,7 +296,7 @@ export const EnvelopeEditorFieldDragDrop = ({
                 selectedRecipientStyles.fieldButtonText,
               )}
             >
-              {field.type !== FieldType.SIGNATURE && <field.icon className="h-4 w-4" />}
+              {(field.type !== FieldType.SIGNATURE || field.stamp) && <field.icon className="h-4 w-4" />}
               {t(field.name)}
             </p>
           </button>
@@ -272,7 +308,7 @@ export const EnvelopeEditorFieldDragDrop = ({
           className={cn(
             'pointer-events-none fixed z-50 flex cursor-pointer flex-col items-center justify-center rounded-[2px] bg-white font-noto text-muted-foreground ring-2 transition duration-200 [container-type:size] dark:text-muted',
             selectedRecipientStyles.base,
-            selectedField === FieldType.SIGNATURE && 'font-signature',
+            selectedField.type === FieldType.SIGNATURE && !selectedField.stamp && 'font-signature',
             {
               '-rotate-6 scale-90 opacity-50 dark:bg-black/20': !isFieldWithinBounds,
               'dark:text-black/60': isFieldWithinBounds,
@@ -285,7 +321,7 @@ export const EnvelopeEditorFieldDragDrop = ({
             width: fieldBounds.current.width,
           }}
         >
-          <span className="text-[clamp(0.425rem,25cqw,0.825rem)]">{t(FRIENDLY_FIELD_TYPE[selectedField])}</span>
+          <span className="text-[clamp(0.425rem,25cqw,0.825rem)]">{t(selectedField.name)}</span>
         </div>
       )}
     </>

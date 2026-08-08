@@ -733,7 +733,9 @@ export const EnvelopeEditorFieldsPageRenderer = ({ pageData }: { pageData: PageR
           // Don't use darkmode for this component, it should look the same for both light/dark modes.
           className="grid w-max grid-cols-5 gap-x-1 gap-y-0.5 rounded-md border border-gray-300 bg-white p-1 text-gray-500 shadow-sm"
         >
-          {fieldButtonList.map((field) => (
+          {fieldButtonList
+            .filter((field) => !field.stamp)
+            .map((field) => (
             <button
               key={field.type}
               onClick={() => createFieldFromPendingTemplate(pendingFieldCreation, field.type)}
@@ -912,7 +914,9 @@ const FieldActionButtons = ({
             </CommandEmpty>
 
             <CommandGroup>
-              {fieldButtonList.map((field) => {
+              {fieldButtonList
+                .filter((field) => !field.stamp)
+                .map((field) => {
                 const FieldIcon = field.icon;
                 const label = t(FRIENDLY_FIELD_TYPE[field.type]);
 
