@@ -1,10 +1,8 @@
 import { DocumentPendingEmailTemplate } from '@documenso/email/templates/document-pending';
 import { unsafeBuildEnvelopeIdQuery } from '@documenso/lib/utils/envelope';
 import { prisma } from '@documenso/prisma';
-import { msg } from '@lingui/core/macro';
 import { EnvelopeType } from '@prisma/client';
 import { createElement } from 'react';
-import { getI18nInstance } from '../../../client-only/providers/i18n-server';
 import { NEXT_PUBLIC_WEBAPP_URL } from '../../../constants/app';
 import { getEmailContext } from '../../../server-only/email/get-email-context';
 import { extractDerivedDocumentEmailSettings } from '../../../types/document-email';
@@ -84,7 +82,6 @@ export const run = async ({ payload }: { payload: TSendDocumentPendingEmailJobDe
     }),
   ]);
 
-  const i18n = await getI18nInstance(emailLanguage);
 
   await emailTransport.sendMail({
     to: {
@@ -93,7 +90,7 @@ export const run = async ({ payload }: { payload: TSendDocumentPendingEmailJobDe
     },
     from: senderEmail,
     replyTo: replyToEmail,
-    subject: i18n._(msg`Waiting for others to complete signing.`),
+    subject: `等待其他签署方完成 · Waiting for others to sign`,
     html,
     text,
   });

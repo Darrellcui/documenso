@@ -1,6 +1,5 @@
 import DocumentReminderEmailTemplate from '@documenso/email/templates/document-reminder';
 import { prisma } from '@documenso/prisma';
-import { msg } from '@lingui/core/macro';
 import {
   DocumentDistributionMethod,
   DocumentStatus,
@@ -12,9 +11,7 @@ import {
 } from '@prisma/client';
 import { createElement } from 'react';
 
-import { getI18nInstance } from '../../../client-only/providers/i18n-server';
 import { NEXT_PUBLIC_WEBAPP_URL } from '../../../constants/app';
-import { RECIPIENT_ROLES_DESCRIPTION } from '../../../constants/recipient-roles';
 import { buildEnvelopeEmailHeaders } from '../../../server-only/email/build-envelope-email-headers';
 import { getEmailContext } from '../../../server-only/email/get-email-context';
 import { assertOrganisationRatesAndLimits } from '../../../server-only/rate-limit/assert-organisation-rates-and-limits';
@@ -128,14 +125,12 @@ export const run = async ({ payload, io }: { payload: TProcessSigningReminderJob
     return;
   }
 
-  const i18n = await getI18nInstance(emailLanguage);
 
-  const recipientActionVerb = i18n._(RECIPIENT_ROLES_DESCRIPTION[recipient.role].actionVerb).toLowerCase();
 
-  let emailSubject = i18n._(msg`Reminder: Please ${recipientActionVerb} the document "${envelope.title}"`);
+  let emailSubject = `温馨提醒：请处理文件 "${envelope.title}" · Reminder: "${envelope.title}"`;
 
   if (organisationType === OrganisationType.ORGANISATION) {
-    emailSubject = i18n._(msg`Reminder: ${envelope.team.name} invited you to ${recipientActionVerb} a document`);
+    emailSubject = `温馨提醒：${envelope.team.name} 邀请您处理文件 · Reminder from ${envelope.team.name}`;
   }
 
   const customEmailTemplate = {
@@ -146,7 +141,7 @@ export const run = async ({ payload, io }: { payload: TProcessSigningReminderJob
 
   if (envelope.documentMeta.subject) {
     emailSubject = renderCustomEmailTemplate(
-      i18n._(msg`Reminder: ${envelope.documentMeta.subject}`),
+      `温馨提醒 · Reminder: ${envelope.documentMeta.subject}`,
       customEmailTemplate,
     );
   }

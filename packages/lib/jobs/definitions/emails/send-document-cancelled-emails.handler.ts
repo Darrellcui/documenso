@@ -1,11 +1,9 @@
 import DocumentCancelTemplate from '@documenso/email/templates/document-cancel';
 import { isRecipientEmailValidForSending } from '@documenso/lib/utils/recipients';
 import { prisma } from '@documenso/prisma';
-import { msg } from '@lingui/core/macro';
 import { EnvelopeType, ReadStatus, RecipientRole, SendStatus, SigningStatus } from '@prisma/client';
 import { createElement } from 'react';
 
-import { getI18nInstance } from '../../../client-only/providers/i18n-server';
 import { NEXT_PUBLIC_WEBAPP_URL } from '../../../constants/app';
 import { getEmailContext } from '../../../server-only/email/get-email-context';
 import { assertOrganisationRatesAndLimits } from '../../../server-only/rate-limit/assert-organisation-rates-and-limits';
@@ -86,7 +84,6 @@ export const run = async ({ payload, io }: { payload: TSendDocumentCancelledEmai
     return;
   }
 
-  const i18n = await getI18nInstance(emailLanguage);
 
   // Send cancellation emails to recipients who have been sent the document or viewed it.
   // CC recipients are excluded because they were never actually emailed about the document
@@ -149,7 +146,7 @@ export const run = async ({ payload, io }: { payload: TSendDocumentCancelledEmai
           },
           from: senderEmail,
           replyTo: replyToEmail,
-          subject: i18n._(msg`Document "${envelope.title}" Cancelled`),
+          subject: `文件 "${envelope.title}" 已取消 · Document Cancelled`,
           html,
           text,
         });

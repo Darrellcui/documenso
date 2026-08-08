@@ -1,9 +1,7 @@
 import { RecipientExpiredTemplate } from '@documenso/email/templates/recipient-expired';
 import { prisma } from '@documenso/prisma';
-import { msg } from '@lingui/core/macro';
 import { createElement } from 'react';
 
-import { getI18nInstance } from '../../../client-only/providers/i18n-server';
 import { NEXT_PUBLIC_WEBAPP_URL } from '../../../constants/app';
 import { getEmailContext } from '../../../server-only/email/get-email-context';
 import { extractDerivedDocumentEmailSettings } from '../../../types/document-email';
@@ -75,7 +73,6 @@ export const run = async ({ payload, io }: { payload: TSendOwnerRecipientExpired
     return;
   }
 
-  const i18n = await getI18nInstance(emailLanguage);
 
   const documentLink = `${NEXT_PUBLIC_WEBAPP_URL()}${formatDocumentsPath(envelope.team.url)}/${envelope.id}`;
 
@@ -103,7 +100,7 @@ export const run = async ({ payload, io }: { payload: TSendOwnerRecipientExpired
         address: documentOwner.email,
       },
       from: senderEmail,
-      subject: i18n._(msg`Signing window expired for "${recipient.name || recipient.email}" on "${envelope.title}"`),
+      subject: `签署期限已过期："${recipient.name || recipient.email}" · Signing window expired`,
       html,
       text,
     });

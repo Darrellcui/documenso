@@ -126,25 +126,45 @@ export const run = async ({ payload, io }: { payload: TSendSigningEmailJobDefini
 
   const recipientActionVerb = i18n._(RECIPIENT_ROLES_DESCRIPTION[recipient.role].actionVerb).toLowerCase();
 
+  // Bilingual (中/EN) action words per role, so email subjects read naturally
+  // in both languages instead of interpolating a localized verb (which left
+  // awkward spacing in Chinese subjects).
+  const zhActionByRole: Record<RecipientRole, string> = {
+    [RecipientRole.SIGNER]: '签署',
+    [RecipientRole.VIEWER]: '查看',
+    [RecipientRole.APPROVER]: '批准',
+    [RecipientRole.ASSISTANT]: '协助处理',
+    [RecipientRole.CC]: '查看',
+  };
+  const enActionByRole: Record<RecipientRole, string> = {
+    [RecipientRole.SIGNER]: 'sign',
+    [RecipientRole.VIEWER]: 'view',
+    [RecipientRole.APPROVER]: 'approve',
+    [RecipientRole.ASSISTANT]: 'assist with',
+    [RecipientRole.CC]: 'view',
+  };
+  const zhAction = zhActionByRole[recipient.role];
+  const enAction = enActionByRole[recipient.role];
+
   let emailMessage = customEmail?.message || '';
-  let emailSubject = i18n._(msg`Please ${recipientActionVerb} this document`);
+  let emailSubject = `请${zhAction}文件 · Please ${enAction} this document`;
 
   if (selfSigner) {
     emailMessage = i18n._(
       msg`You have initiated the document ${`"${envelope.title}"`} that requires you to ${recipientActionVerb} it.`,
     );
-    emailSubject = i18n._(msg`Please ${recipientActionVerb} your document`);
+    emailSubject = `请${zhAction}您的文件 · Please ${enAction} your document`;
   }
 
   if (isDirectTemplate) {
     emailMessage = i18n._(
       msg`A document was created by your direct template that requires you to ${recipientActionVerb} it.`,
     );
-    emailSubject = i18n._(msg`Please ${recipientActionVerb} this document created by your direct template`);
+    emailSubject = `请${zhAction}文件 · Please ${enAction} this document`;
   }
 
   if (organisationType === OrganisationType.ORGANISATION) {
-    emailSubject = i18n._(msg`${team.name} invited you to ${recipientActionVerb} a document`);
+    emailSubject = `${team.name} 邀请您${zhAction}文件 · ${team.name} invited you to ${enAction} a document`;
     emailMessage = customEmail?.message ?? '';
 
     if (!emailMessage) {

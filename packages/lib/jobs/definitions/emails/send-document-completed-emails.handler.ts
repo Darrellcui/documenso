@@ -147,7 +147,7 @@ export const run = async ({ payload, io }: { payload: TSendDocumentCompletedEmai
       ],
       from: senderEmail,
       replyTo: replyToEmail,
-      subject: i18n._(msg`Signing Complete!`),
+      subject: `签署完成 · Signing Complete`,
       html,
       text,
       attachments: completedDocumentEmailAttachments,

@@ -1,10 +1,8 @@
 import { DocumentRecipientSignedEmailTemplate } from '@documenso/email/templates/document-recipient-signed';
 import { prisma } from '@documenso/prisma';
-import { msg } from '@lingui/core/macro';
 import { EnvelopeType } from '@prisma/client';
 import { createElement } from 'react';
 
-import { getI18nInstance } from '../../../client-only/providers/i18n-server';
 import { NEXT_PUBLIC_WEBAPP_URL } from '../../../constants/app';
 import { getEmailContext } from '../../../server-only/email/get-email-context';
 import { extractDerivedDocumentEmailSettings } from '../../../types/document-email';
@@ -85,7 +83,6 @@ export const run = async ({ payload, io }: { payload: TSendRecipientSignedEmailJ
 
   const assetBaseUrl = NEXT_PUBLIC_WEBAPP_URL() || 'http://localhost:3000';
 
-  const i18n = await getI18nInstance(emailLanguage);
 
   const template = createElement(DocumentRecipientSignedEmailTemplate, {
     documentName: envelope.title,
@@ -110,7 +107,7 @@ export const run = async ({ payload, io }: { payload: TSendRecipientSignedEmailJ
         address: owner.email,
       },
       from: senderEmail,
-      subject: i18n._(msg`${recipientReference} has signed "${envelope.title}"`),
+      subject: `${recipientReference} 已签署 "${envelope.title}" · Recipient signed`,
       html,
       text,
     });

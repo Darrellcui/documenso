@@ -3,11 +3,9 @@ import DocumentRejectedEmail from '@documenso/email/templates/document-rejected'
 import DocumentRejectionConfirmedEmail from '@documenso/email/templates/document-rejection-confirmed';
 import { isRecipientEmailValidForSending } from '@documenso/lib/utils/recipients';
 import { prisma } from '@documenso/prisma';
-import { msg } from '@lingui/core/macro';
 import { EnvelopeType, SendStatus, SigningStatus } from '@prisma/client';
 import { createElement } from 'react';
 
-import { getI18nInstance } from '../../../client-only/providers/i18n-server';
 import { NEXT_PUBLIC_WEBAPP_URL } from '../../../constants/app';
 import { DOCUMENSO_INTERNAL_EMAIL } from '../../../constants/email';
 import { getEmailContext } from '../../../server-only/email/get-email-context';
@@ -73,7 +71,6 @@ export const run = async ({ payload, io }: { payload: TSendSigningRejectionEmail
     meta: envelope.documentMeta,
   });
 
-  const i18n = await getI18nInstance(emailLanguage);
 
   // Send confirmation email to the recipient who rejected.
   // Skipped when the organisation has email sending disabled, since this is sent on its behalf.
@@ -104,7 +101,7 @@ export const run = async ({ payload, io }: { payload: TSendSigningRejectionEmail
         },
         from: senderEmail,
         replyTo: replyToEmail,
-        subject: i18n._(msg`Document "${envelope.title}" - Rejection Confirmed`),
+        subject: `文件 "${envelope.title}" 拒签已确认 · Rejection Confirmed`,
         html,
         text,
       });
@@ -136,7 +133,7 @@ export const run = async ({ payload, io }: { payload: TSendSigningRejectionEmail
         address: documentOwner.email,
       },
       from: DOCUMENSO_INTERNAL_EMAIL, // Purposefully using internal email here.
-      subject: i18n._(msg`Document "${envelope.title}" - Rejected by ${recipient.name}`),
+      subject: `文件 "${envelope.title}" 已被 ${recipient.name} 拒签 · Document Rejected`,
       html,
       text,
     });

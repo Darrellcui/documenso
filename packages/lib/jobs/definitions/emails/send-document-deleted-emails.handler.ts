@@ -1,8 +1,6 @@
 import DocumentCancelTemplate from '@documenso/email/templates/document-cancel';
-import { msg } from '@lingui/core/macro';
 import { createElement } from 'react';
 
-import { getI18nInstance } from '../../../client-only/providers/i18n-server';
 import { NEXT_PUBLIC_WEBAPP_URL } from '../../../constants/app';
 import { getEmailContext } from '../../../server-only/email/get-email-context';
 import { isRecipientEmailValidForSending } from '../../../utils/recipients';
@@ -34,7 +32,6 @@ export const run = async ({ payload, io }: { payload: TSendDocumentDeletedEmails
   }
 
   const assetBaseUrl = NEXT_PUBLIC_WEBAPP_URL() || 'http://localhost:3000';
-  const i18n = await getI18nInstance(emailLanguage);
 
   for (const recipient of recipients) {
     await io.runTask(`send-document-deleted-emails-${recipient.email}`, async () => {
@@ -61,7 +58,7 @@ export const run = async ({ payload, io }: { payload: TSendDocumentDeletedEmails
         },
         from: senderEmail,
         replyTo: replyToEmail,
-        subject: i18n._(msg`Document Cancelled`),
+        subject: `文件已取消 · Document Cancelled`,
         html,
         text,
       });

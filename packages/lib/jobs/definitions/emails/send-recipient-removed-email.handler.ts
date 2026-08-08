@@ -1,9 +1,7 @@
 import RecipientRemovedFromDocumentTemplate from '@documenso/email/templates/recipient-removed-from-document';
 import { prisma } from '@documenso/prisma';
-import { msg } from '@lingui/core/macro';
 import { createElement } from 'react';
 
-import { getI18nInstance } from '../../../client-only/providers/i18n-server';
 import { NEXT_PUBLIC_WEBAPP_URL } from '../../../constants/app';
 import { getEmailContext } from '../../../server-only/email/get-email-context';
 import { assertOrganisationRatesAndLimits } from '../../../server-only/rate-limit/assert-organisation-rates-and-limits';
@@ -82,7 +80,6 @@ export const run = async ({ payload, io }: { payload: TSendRecipientRemovedEmail
     assetBaseUrl,
   });
 
-  const i18n = await getI18nInstance(emailLanguage);
 
   await io.runTask('send-recipient-removed-email', async () => {
     const [html, text] = await Promise.all([
@@ -97,7 +94,7 @@ export const run = async ({ payload, io }: { payload: TSendRecipientRemovedEmail
       },
       from: senderEmail,
       replyTo: replyToEmail,
-      subject: i18n._(msg`You have been removed from a document`),
+      subject: `您已被移出某文件 · You have been removed from a document`,
       html,
       text,
     });
