@@ -33,7 +33,11 @@ export default function RecipientLayout({ matches }: Route.ComponentProps) {
   );
 
   return (
-    <div className="min-h-screen">
+    // Recipient/signing pages are always light: brand colors are designed for a
+    // light surface, and a viewer's system dark mode would otherwise put dark
+    // brand text on a dark background. `dark-mode-disabled` forces the light
+    // token set (see theme.css) regardless of the global `.dark` class.
+    <div className="min-h-screen bg-background dark-mode-disabled">
       {!hideHeader && sessionData?.user && <AuthenticatedHeader />}
 
       <main

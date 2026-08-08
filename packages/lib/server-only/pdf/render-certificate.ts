@@ -576,7 +576,7 @@ const renderBranding = async ({ qrToken, i18n }: { qrToken: string | null; i18n:
   const text = new Konva.Text({
     x: 0,
     verticalAlign: 'middle',
-    text: i18n._(msg`Signing certificate provided by`) + ':',
+    text: '本报告由以下机构提供 · Provided by:',
     fontStyle: fontMedium,
     fontFamily: fontStack,
     fontSize: textSm,
@@ -799,9 +799,9 @@ export async function renderCertificate({
       new Konva.Text({
         x: titleX,
         y: 11,
-        text: i18n._(msg`Signing Certificate`),
+        text: '最终稽查报告 · Final Audit Report',
         fontFamily: fontStack,
-        fontSize: 19,
+        fontSize: 18,
         fontStyle: '700',
         fill: brandNavy,
       }),
