@@ -17,7 +17,8 @@ import {
 } from '@documenso/ui/primitives/dialog';
 import { Trans } from '@lingui/react/macro';
 import { type DocumentData, DocumentStatus, type EnvelopeItem, EnvelopeType } from '@prisma/client';
-import { DownloadIcon } from 'lucide-react';
+import { CheckCircle2, DownloadIcon } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { DateTime } from 'luxon';
 import { useEffect, useState } from 'react';
 
@@ -38,6 +39,55 @@ export type DocumentCertificateQRViewProps = {
   completedDate?: Date;
   token: string;
 };
+
+const SummaryField = ({ label, value }: { label: ReactNode; value: ReactNode }) => (
+  <div className="space-y-0.5">
+    <dt className="text-muted-foreground text-xs">{label}</dt>
+    <dd className="font-medium text-foreground text-sm">{value}</dd>
+  </div>
+);
+
+/**
+ * Professional verification summary shown when a signed document's certificate
+ * QR code is scanned. Confirms the document is authentic and complete, and
+ * surfaces the key audit facts above the document preview.
+ */
+const CertificateVerifiedSummary = ({
+  title,
+  recipientCount,
+  formattedDate,
+  downloadSlot,
+}: {
+  title: string;
+  recipientCount: number;
+  formattedDate: string;
+  downloadSlot: ReactNode;
+}) => (
+  <div className="w-full rounded-2xl border border-border bg-card p-6 shadow-sm">
+    <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
+      <div className="flex items-start gap-3">
+        <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <CheckCircle2 className="h-6 w-6" />
+        </div>
+        <div className="space-y-1">
+          <h1 className="font-semibold text-foreground text-xl leading-tight">{title}</h1>
+          <p className="text-muted-foreground text-sm">
+            此文件已通过 Xenvera Innovation 电子签署验证并完成 · Verified &amp; completed via Xenvera e-signature
+          </p>
+        </div>
+      </div>
+
+      {downloadSlot}
+    </div>
+
+    <dl className="mt-5 grid grid-cols-2 gap-4 border-border border-t pt-5 sm:grid-cols-4">
+      <SummaryField label={<Trans>Status</Trans>} value={<Trans>Completed</Trans>} />
+      <SummaryField label={<Trans>Completed on</Trans>} value={formattedDate || '—'} />
+      <SummaryField label={<Trans>Recipients</Trans>} value={recipientCount} />
+      <SummaryField label="Xenvera Innovation" value="(HK) Limited" />
+    </dl>
+  </div>
+);
 
 export const DocumentCertificateQRView = ({
   documentId,
@@ -117,35 +167,27 @@ export const DocumentCertificateQRView = ({
         </EnvelopeRenderProvider>
       ) : (
         <>
-          <div className="flex w-full flex-col justify-between gap-4 md:flex-row md:items-end">
-            <div className="space-y-1">
-              <h1 className="font-medium text-xl">{title}</h1>
-              <div className="flex flex-col gap-0.5 text-muted-foreground text-sm">
-                <p>
-                  <Trans>{recipientCount} recipients</Trans>
-                </p>
+          <CertificateVerifiedSummary
+            title={title}
+            recipientCount={recipientCount}
+            formattedDate={formattedDate}
+            downloadSlot={
+              <EnvelopeDownloadDialog
+                envelopeId={envelopeItems[0].envelopeId}
+                envelopeStatus={DocumentStatus.COMPLETED}
+                envelopeItems={envelopeItems}
+                token={token}
+                trigger={
+                  <Button type="button" variant="outline" className="w-fit">
+                    <DownloadIcon className="mr-2 h-5 w-5" />
+                    <Trans>Download</Trans>
+                  </Button>
+                }
+              />
+            }
+          />
 
-                <p>
-                  <Trans>Completed on {formattedDate}</Trans>
-                </p>
-              </div>
-            </div>
-
-            <EnvelopeDownloadDialog
-              envelopeId={envelopeItems[0].envelopeId}
-              envelopeStatus={DocumentStatus.COMPLETED}
-              envelopeItems={envelopeItems}
-              token={token}
-              trigger={
-                <Button type="button" variant="outline" className="w-fit">
-                  <DownloadIcon className="mr-2 h-5 w-5" />
-                  <Trans>Download</Trans>
-                </Button>
-              }
-            />
-          </div>
-
-          <div className="mt-12 w-full">
+          <div className="mt-8 w-full">
             <PDFViewerLazy
               key={envelopeItems[0]?.id}
               data={getDocumentDataUrlForPdfViewer({
@@ -177,35 +219,27 @@ const DocumentCertificateQrV2 = ({ title, recipientCount, formattedDate, token }
 
   return (
     <div className="flex min-h-screen flex-col items-start">
-      <div className="flex w-full flex-col justify-between gap-4 md:flex-row md:items-end">
-        <div className="space-y-1">
-          <h1 className="font-medium text-xl">{title}</h1>
-          <div className="flex flex-col gap-0.5 text-muted-foreground text-sm">
-            <p>
-              <Trans>{recipientCount} recipients</Trans>
-            </p>
+      <CertificateVerifiedSummary
+        title={title}
+        recipientCount={recipientCount}
+        formattedDate={formattedDate}
+        downloadSlot={
+          <EnvelopeDownloadDialog
+            envelopeId={envelopeItems[0].envelopeId}
+            envelopeStatus={DocumentStatus.COMPLETED}
+            envelopeItems={envelopeItems}
+            token={token}
+            trigger={
+              <Button type="button" variant="outline" className="w-fit">
+                <DownloadIcon className="mr-2 h-5 w-5" />
+                <Trans>Download</Trans>
+              </Button>
+            }
+          />
+        }
+      />
 
-            <p>
-              <Trans>Completed on {formattedDate}</Trans>
-            </p>
-          </div>
-        </div>
-
-        <EnvelopeDownloadDialog
-          envelopeId={envelopeItems[0].envelopeId}
-          envelopeStatus={DocumentStatus.COMPLETED}
-          envelopeItems={envelopeItems}
-          token={token}
-          trigger={
-            <Button type="button" variant="outline" className="w-fit">
-              <DownloadIcon className="mr-2 h-5 w-5" />
-              <Trans>Download</Trans>
-            </Button>
-          }
-        />
-      </div>
-
-      <div className="mt-12 w-full">
+      <div className="mt-8 w-full">
         <EnvelopeRendererFileSelector className="mb-4 p-0" fields={[]} secondaryOverride={''} />
 
         <EnvelopePdfViewer

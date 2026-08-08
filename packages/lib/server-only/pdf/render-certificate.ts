@@ -165,11 +165,14 @@ const buildTimelineEvents = (options: {
         latestCompletedAt = at;
       }
 
+      const signatureId = recipient.signatureField?.secondaryId?.toUpperCase();
+
       events.push({
         date: at,
         icon: 'signed',
         title: t(`${who} 已对文件进行电子签署`, `${who} electronically signed the document`),
         meta:
+          (signatureId ? `${t('签名 ID', 'Signature ID')}: ${signatureId} · ` : '') +
           `${t('签名日期', 'Signed')}: ${fmtDateTime(at)}` +
           (recipient.logs.completed.ipAddress ? ` · IP: ${recipient.logs.completed.ipAddress}` : ''),
       });
@@ -248,6 +251,11 @@ export async function renderCertificate({
   const anyRejected = recipients.some((recipient) => recipient.logs.rejected);
   const statusText = anyRejected ? t('已拒签', 'Rejected') : t('已签署', 'Signed');
 
+  // Prefer the familiar per-signature ID over the internal envelope id.
+  const primarySignatureId = recipients
+    .find((recipient) => recipient.signatureField?.secondaryId)
+    ?.signatureField?.secondaryId?.toUpperCase();
+
   const events = buildTimelineEvents({ recipients, envelopeOwner, documentCreatedAt, t });
 
   // Page frame.
@@ -314,7 +322,7 @@ export async function renderCertificate({
       [t('建立日期', 'Created'), fmtDate(documentCreatedAt)],
       [t('作者', 'Author'), displayName(envelopeOwner)],
       [t('状态', 'Status'), statusText],
-      [t('交易 ID', 'Transaction ID'), envelopeId],
+      [t('签名 ID', 'Signature ID'), primarySignatureId ?? '—'],
     ];
 
     const boxHeight = boxPad * 2 + rowH * rows.length;
