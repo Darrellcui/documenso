@@ -91,6 +91,11 @@ const fmtDate = (date: Date) => DateTime.fromJSDate(date).setZone('utc').toForma
 const displayName = (recipient: { name: string; email: string }) =>
   recipient.name ? `${recipient.name} (${recipient.email})` : recipient.email;
 
+// Locale-aware label picker: the audit report follows the document language.
+// Chinese documents render Chinese labels, everything else falls back to
+// English (the international default for audit trails).
+type Translate = (zh: string, en: string) => string;
+
 type TimelineEvent = {
   date: Date;
   icon: IconKind;
@@ -102,8 +107,9 @@ const buildTimelineEvents = (options: {
   recipients: CertificateRecipient[];
   envelopeOwner: { name: string; email: string };
   documentCreatedAt: Date;
+  t: Translate;
 }): TimelineEvent[] => {
-  const { recipients, envelopeOwner, documentCreatedAt } = options;
+  const { recipients, envelopeOwner, documentCreatedAt, t } = options;
 
   const events: TimelineEvent[] = [];
 
@@ -111,7 +117,7 @@ const buildTimelineEvents = (options: {
   events.push({
     date: documentCreatedAt,
     icon: 'created',
-    title: `${displayName(envelopeOwner)} 已建立文件 · Created the document`,
+    title: `${displayName(envelopeOwner)} ${t('已建立文件', 'created the document')}`,
     meta: fmtDateTime(documentCreatedAt),
   });
 
@@ -125,7 +131,7 @@ const buildTimelineEvents = (options: {
       events.push({
         date: recipient.logs.emailed.createdAt,
         icon: 'emailed',
-        title: `已通过电子邮件发送给 ${who} 进行签署 · Emailed for signing`,
+        title: t(`已通过电子邮件发送给 ${who} 进行签署`, `Emailed to ${who} for signing`),
         meta: fmtDateTime(recipient.logs.emailed.createdAt),
       });
     }
@@ -134,7 +140,7 @@ const buildTimelineEvents = (options: {
       events.push({
         date: recipient.logs.opened.createdAt,
         icon: 'viewed',
-        title: `${who} 已查看文件 · Viewed the document`,
+        title: t(`${who} 已查看文件`, `${who} viewed the document`),
         meta:
           fmtDateTime(recipient.logs.opened.createdAt) +
           (recipient.logs.opened.ipAddress ? ` · IP: ${recipient.logs.opened.ipAddress}` : ''),
@@ -146,11 +152,11 @@ const buildTimelineEvents = (options: {
       events.push({
         date: recipient.logs.rejected.createdAt,
         icon: 'rejected',
-        title: `${who} 已拒绝签署 · Rejected the document`,
+        title: t(`${who} 已拒绝签署`, `${who} rejected the document`),
         meta:
           fmtDateTime(recipient.logs.rejected.createdAt) +
           (recipient.logs.rejected.ipAddress ? ` · IP: ${recipient.logs.rejected.ipAddress}` : '') +
-          (recipient.rejectionReason ? ` · 原因/Reason: ${recipient.rejectionReason}` : ''),
+          (recipient.rejectionReason ? ` · ${t('原因', 'Reason')}: ${recipient.rejectionReason}` : ''),
       });
     } else if (recipient.logs.completed) {
       const at = recipient.logs.completed.createdAt;
@@ -162,9 +168,9 @@ const buildTimelineEvents = (options: {
       events.push({
         date: at,
         icon: 'signed',
-        title: `${who} 已对文件进行电子签署 · Electronically signed`,
+        title: t(`${who} 已对文件进行电子签署`, `${who} electronically signed the document`),
         meta:
-          `签名日期/Signed: ${fmtDateTime(at)}` +
+          `${t('签名日期', 'Signed')}: ${fmtDateTime(at)}` +
           (recipient.logs.completed.ipAddress ? ` · IP: ${recipient.logs.completed.ipAddress}` : ''),
       });
     }
@@ -175,7 +181,7 @@ const buildTimelineEvents = (options: {
     events.push({
       date: latestCompletedAt,
       icon: 'completed',
-      title: '已完成协议 · Agreement completed',
+      title: t('已完成协议', 'Agreement completed'),
       meta: fmtDateTime(latestCompletedAt),
     });
   }
@@ -199,8 +205,14 @@ export async function renderCertificate({
   envelopeOwner,
   pageWidth,
   pageHeight,
-}: Omit<GenerateCertificateOptions, 'i18n'> & { i18n?: I18n }) {
+  i18n,
+}: GenerateCertificateOptions) {
   ensureFontLibrary();
+
+  // The audit report follows the document language: Chinese documents get
+  // Chinese labels, all other languages fall back to English.
+  const isZh = (i18n?.locale ?? '').toLowerCase().startsWith('zh');
+  const t: Translate = (zh, en) => (isZh ? zh : en);
 
   const frameInset = 22;
   const padX = 46;
@@ -234,9 +246,9 @@ export async function renderCertificate({
   }
 
   const anyRejected = recipients.some((recipient) => recipient.logs.rejected);
-  const statusText = anyRejected ? '已拒签 · Rejected' : '已签署 · Signed';
+  const statusText = anyRejected ? t('已拒签', 'Rejected') : t('已签署', 'Signed');
 
-  const events = buildTimelineEvents({ recipients, envelopeOwner, documentCreatedAt });
+  const events = buildTimelineEvents({ recipients, envelopeOwner, documentCreatedAt, t });
 
   // Page frame.
   const buildFrame = () =>
@@ -271,7 +283,7 @@ export async function renderCertificate({
       new Konva.Text({
         x: contentX,
         y: padTop + 28,
-        text: '最终稽核报告 · Final Audit Report',
+        text: t('最终稽核报告', 'Final Audit Report'),
         fontFamily: fontStack,
         fontSize: 10,
         fontStyle: fontMedium,
@@ -299,10 +311,10 @@ export async function renderCertificate({
     const labelW = 96;
 
     const rows: [string, string][] = [
-      ['建立日期 · Created', fmtDate(documentCreatedAt)],
-      ['作者 · Author', displayName(envelopeOwner)],
-      ['状态 · Status', statusText],
-      ['交易 ID · Transaction ID', envelopeId],
+      [t('建立日期', 'Created'), fmtDate(documentCreatedAt)],
+      [t('作者', 'Author'), displayName(envelopeOwner)],
+      [t('状态', 'Status'), statusText],
+      [t('交易 ID', 'Transaction ID'), envelopeId],
     ];
 
     const boxHeight = boxPad * 2 + rowH * rows.length;
@@ -356,7 +368,9 @@ export async function renderCertificate({
       new Konva.Text({
         x: contentX,
         y: sectionY,
-        text: `「${ellipsize(documentTitle || envelopeId, 30)}」操作记录 · Activity`,
+        text: isZh
+          ? `「${ellipsize(documentTitle || envelopeId, 30)}」操作记录`
+          : `Activity — ${ellipsize(documentTitle || envelopeId, 30)}`,
         fontFamily: fontStack,
         fontSize: 13,
         fontStyle: '700',
@@ -461,7 +475,7 @@ export async function renderCertificate({
         new Konva.Text({
           x: logoW + 10,
           y: logoY + 8,
-          text: '由 Xenvera Innovation (HK) Limited 提供',
+          text: t('由 Xenvera Innovation (HK) Limited 提供', 'Provided by Xenvera Innovation (HK) Limited'),
           fontFamily: fontStack,
           fontSize: 8,
           fontStyle: fontMedium,
@@ -532,7 +546,7 @@ export async function renderCertificate({
         new Konva.Text({
           x: contentX,
           y: padTop,
-          text: '最终稽核报告 · Final Audit Report（续 · continued）',
+          text: t('最终稽核报告（续）', 'Final Audit Report (continued)'),
           fontFamily: fontStack,
           fontSize: 12,
           fontStyle: '700',
