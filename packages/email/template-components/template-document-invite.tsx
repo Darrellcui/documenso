@@ -75,13 +75,27 @@ export const TemplateDocumentInvite = ({
             ))}
         </Text>
 
+        <Text className="mx-auto mt-1 mb-0 text-center text-muted-foreground text-sm">
+          Xenvera Innovation · 电子签署 E-Signature
+        </Text>
+
+        {/* Bilingual (中/EN) instruction line — Xenvera suppliers span both. */}
         <Text className="my-1 text-center text-base text-muted-foreground">
           {match(role)
-            .with(RecipientRole.SIGNER, () => <Trans>Continue by signing the document.</Trans>)
-            .with(RecipientRole.VIEWER, () => <Trans>Continue by viewing the document.</Trans>)
-            .with(RecipientRole.APPROVER, () => <Trans>Continue by approving the document.</Trans>)
+            .with(RecipientRole.SIGNER, () => '请点击下方按钮查看并签署文件。')
+            .with(RecipientRole.VIEWER, () => '请点击下方按钮查看文件。')
+            .with(RecipientRole.APPROVER, () => '请点击下方按钮查看并批准文件。')
             .with(RecipientRole.CC, () => '')
-            .with(RecipientRole.ASSISTANT, () => <Trans>Continue by assisting with the document.</Trans>)
+            .with(RecipientRole.ASSISTANT, () => '请点击下方按钮协助处理文件。')
+            .exhaustive()}
+        </Text>
+        <Text className="mt-0 mb-1 text-center text-muted-foreground text-sm">
+          {match(role)
+            .with(RecipientRole.SIGNER, () => 'Please review and sign the document below.')
+            .with(RecipientRole.VIEWER, () => 'Please review the document below.')
+            .with(RecipientRole.APPROVER, () => 'Please review and approve the document below.')
+            .with(RecipientRole.CC, () => '')
+            .with(RecipientRole.ASSISTANT, () => 'Please assist with the document below.')
             .exhaustive()}
         </Text>
 
@@ -91,11 +105,11 @@ export const TemplateDocumentInvite = ({
             href={signDocumentLink}
           >
             {match(role)
-              .with(RecipientRole.SIGNER, () => <Trans>View Document to sign</Trans>)
-              .with(RecipientRole.VIEWER, () => <Trans>View Document</Trans>)
-              .with(RecipientRole.APPROVER, () => <Trans>View Document to approve</Trans>)
+              .with(RecipientRole.SIGNER, () => '查看并签署 · View & Sign')
+              .with(RecipientRole.VIEWER, () => '查看文件 · View Document')
+              .with(RecipientRole.APPROVER, () => '查看并批准 · View & Approve')
               .with(RecipientRole.CC, () => '')
-              .with(RecipientRole.ASSISTANT, () => <Trans>View Document to assist</Trans>)
+              .with(RecipientRole.ASSISTANT, () => '协助处理 · Assist')
               .exhaustive()}
           </Button>
         </Section>
