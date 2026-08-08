@@ -265,3 +265,17 @@
 .swagger-dark-theme .swagger-ui .microlight {
   filter: invert(100%) hue-rotate(180deg);
 }
+
+/*
+ * Prevent iOS Safari from zooming the page when a form control is focused.
+ * Any input smaller than 16px triggers the zoom, which feels broken on the
+ * signing pages. Bump interactive controls to 16px on small screens only —
+ * this does not lock the user's own pinch-zoom.
+ */
+@media (max-width: 640px) {
+  input:not([type='checkbox']):not([type='radio']),
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}

@@ -80,7 +80,7 @@ export const DocumentSigningPageViewV2 = () => {
   }, [recipientFieldsRemaining, selectedAssistantRecipientFields, currentEnvelopeItem]);
 
   return (
-    <div className="min-h-screen w-screen bg-gray-50 dark:bg-background">
+    <div className="min-h-screen w-full overflow-x-hidden bg-gray-50 dark:bg-background">
       <SignFieldEmailDialog.Root />
       <SignFieldTextDialog.Root />
       <SignFieldNumberDialog.Root />
@@ -93,7 +93,7 @@ export const DocumentSigningPageViewV2 = () => {
       <EnvelopeSignerHeader />
 
       {/* Main Content Area */}
-      <div className="flex h-[calc(100vh-4rem)] w-screen">
+      <div className="flex h-[calc(100vh-4rem)] w-full">
         {/* Left Section - Step Navigation */}
         <div
           className={cn(

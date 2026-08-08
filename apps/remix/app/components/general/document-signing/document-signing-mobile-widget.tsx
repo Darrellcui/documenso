@@ -15,11 +15,13 @@ import { EnvelopeSignerCompleteDialog } from '../envelope-signing/envelope-signi
 import { useRequiredEnvelopeSigningContext } from './envelope-signing-provider';
 
 export const DocumentSigningMobileWidget = () => {
-  const [isExpanded, setIsExpanded] = useState(false);
+  // Default to expanded (except pure viewers) so the signing form is
+  // immediately visible on mobile instead of hidden behind a collapsed bar.
+  const { recipientFieldsRemaining, recipient, requiredRecipientFields } = useRequiredEnvelopeSigningContext();
+
+  const [isExpanded, setIsExpanded] = useState(recipient.role !== RecipientRole.VIEWER);
 
   const { hidePoweredBy = true } = useEmbedSigningContext() || {};
-
-  const { recipientFieldsRemaining, recipient, requiredRecipientFields } = useRequiredEnvelopeSigningContext();
 
   /**
    * Pre open the widget for assistants to let them know it's there.
