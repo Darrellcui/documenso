@@ -1,4 +1,3 @@
-import { Trans } from '@lingui/react/macro';
 
 import { Container, Heading, Section, Text } from '../components';
 
@@ -19,27 +18,28 @@ export function TemplateDocumentRejectionConfirmed({
     <Container>
       <Section>
         <Heading className="font-semibold text-2xl">
-          <Trans>Rejection Confirmed</Trans>
+          拒签已确认 · Rejection Confirmed
         </Heading>
 
         <Text className="text-base text-foreground">
-          <Trans>
-            This email confirms that you have rejected the document{' '}
-            <strong className="font-bold">"{documentName}"</strong> sent by {documentOwnerName}.
-          </Trans>
+          此邮件确认您已拒绝签署由 {documentOwnerName} 发送的文件{' '}
+          <strong className="font-bold">"{documentName}"</strong>。
+        </Text>
+        <Text className="text-muted-foreground text-sm">
+          This confirms that you have rejected "{documentName}" sent by {documentOwnerName}.
         </Text>
 
         {reason && (
           <Text className="font-medium text-base text-muted-foreground">
-            <Trans>Rejection reason: {reason}</Trans>
+            拒签原因 / Reason: {reason}
           </Text>
         )}
 
         <Text className="text-base">
-          <Trans>
-            The document owner has been notified of this rejection. No further action is required from you at this time.
-            The document owner may contact you with any questions regarding this rejection.
-          </Trans>
+          文件所有者已收到通知，您当前无需再做任何操作；如有疑问，对方可能会与您联系。
+        </Text>
+        <Text className="text-muted-foreground text-sm">
+          The document owner has been notified. No further action is required from you.
         </Text>
       </Section>
     </Container>

@@ -1,9 +1,7 @@
-import { Trans } from '@lingui/react/macro';
 import { Fragment } from 'react';
 
 import { Link, Section, Text } from '../components';
 import { useBranding } from '../providers/branding';
-import { getSafeBrandingUrl } from '../utils/branding-url';
 
 export type TemplateFooterProps = {
   isDocument?: boolean;
@@ -13,31 +11,21 @@ export type TemplateFooterProps = {
 export const TemplateFooter = ({ isDocument = true, reportUrl }: TemplateFooterProps) => {
   const branding = useBranding();
 
-  const safeBrandingUrl = branding.brandingEnabled ? getSafeBrandingUrl(branding.brandingUrl) : null;
-
   return (
     <Section>
       {reportUrl && (
         <Text className="my-4 text-base text-muted-foreground">
-          <Trans>
-            Did not expect this email?{' '}
-            <Link className="text-primary" href={reportUrl}>
-              Click here to report the sender
-            </Link>
-            . Never sign a document you don't recognize or weren't expecting.
-          </Trans>
-        </Text>
-      )}
-
-      {isDocument && !branding.brandingHidePoweredBy && (
-        <Text className="my-4 text-base text-muted-foreground">
-          <Trans>
-            This document was sent using{' '}
-            <Link className="text-primary" href="https://documen.so/mail-footer">
-              Documenso
-            </Link>
-            .
-          </Trans>
+          没想到会收到此邮件？
+          <Link className="text-primary" href={reportUrl}>
+            点此举报发件人
+          </Link>
+          。请勿签署您不认识或非预期的文件。
+          <br />
+          Not expecting this email?{' '}
+          <Link className="text-primary" href={reportUrl}>
+            Report the sender
+          </Link>
+          . Never sign a document you don't recognize.
         </Text>
       )}
 
@@ -54,21 +42,6 @@ export const TemplateFooter = ({ isDocument = true, reportUrl }: TemplateFooterP
         </Text>
       )}
 
-      {branding.brandingEnabled && safeBrandingUrl && (
-        <Text className="my-8 text-muted-foreground text-sm">
-          <Link href={safeBrandingUrl} target="_blank">
-            {safeBrandingUrl}
-          </Link>
-        </Text>
-      )}
-
-      {!branding.brandingEnabled && (
-        <Text className="my-8 text-muted-foreground text-sm">
-          Documenso, Inc.
-          <br />
-          2261 Market Street, #5211, San Francisco, CA 94114, USA
-        </Text>
-      )}
     </Section>
   );
 };

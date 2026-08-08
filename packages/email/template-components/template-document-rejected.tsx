@@ -1,4 +1,3 @@
-import { Trans } from '@lingui/react/macro';
 
 import { Button, Heading, Text } from '../components';
 
@@ -18,30 +17,33 @@ export function TemplateDocumentRejected({
   return (
     <div className="mt-4">
       <Heading className="mb-4 text-center font-semibold text-2xl text-foreground">
-        <Trans>Document Rejected</Trans>
+        文件已被拒签 · Document Rejected
       </Heading>
 
-      <Text className="mb-4 text-base">
-        <Trans>
-          {signerName} has rejected the document "{documentName}".
-        </Trans>
+      <Text className="mb-1 text-base">
+        {signerName} 已拒绝签署文件 "{documentName}"。
+      </Text>
+      <Text className="mb-4 text-muted-foreground text-sm">
+        {signerName} has rejected the document "{documentName}".
       </Text>
 
       {rejectionReason && (
         <Text className="mb-4 text-base text-muted-foreground">
-          <Trans>Reason for rejection: {rejectionReason}</Trans>
+          拒签原因 / Reason: {rejectionReason}
         </Text>
       )}
 
       <Text className="mb-6 text-base">
-        <Trans>You can view the document and its status by clicking the button below.</Trans>
+        点击下方按钮可查看文件及其状态。
+        <br />
+        You can view the document and its status below.
       </Text>
 
       <Button
         href={documentUrl}
         className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 text-center font-medium text-primary-foreground text-sm no-underline"
       >
-        <Trans>View Document</Trans>
+        查看文件 · View Document
       </Button>
     </div>
   );
