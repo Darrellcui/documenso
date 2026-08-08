@@ -1,4 +1,6 @@
 
+import { useLingui } from '@lingui/react';
+
 import { Column, Img, Section, Text } from '../components';
 import { TemplateDocumentImage } from './template-document-image';
 
@@ -19,6 +21,9 @@ export const TemplateDocumentRecipientSigned = ({
     return new URL(path, assetBaseUrl).toString();
   };
 
+  const { i18n } = useLingui();
+  const isZh = i18n.locale.toLowerCase().startsWith('zh');
+
   const recipientReference = recipientName || recipientEmail;
 
   return (
@@ -34,20 +39,22 @@ export const TemplateDocumentRecipientSigned = ({
                 className="-mt-0.5 mr-2 inline h-7 w-7 align-middle"
                 alt=""
               />
-              已签署 · Signed
+              {isZh ? '已签署 · Signed' : 'Signed'}
             </Text>
           </Column>
         </Section>
 
         <Text className="mb-0 text-center font-semibold text-foreground text-lg">
-          {recipientReference} 已签署 "{documentName}"
+          {isZh ? `${recipientReference} 已签署 "${documentName}"` : `${recipientReference} has signed "${documentName}"`}
         </Text>
-        <Text className="mt-1 mb-0 text-center font-medium text-base text-muted-foreground">
-          {recipientReference} has signed "{documentName}"
-        </Text>
+        {isZh && (
+          <Text className="mt-1 mb-0 text-center font-medium text-base text-muted-foreground">
+            {recipientReference} has signed "{documentName}"
+          </Text>
+        )}
 
         <Text className="mx-auto mt-3 mb-6 max-w-[80%] text-center text-muted-foreground text-sm">
-          该签署方已完成签署。 · This recipient has completed signing.
+          {isZh ? '该签署方已完成签署。 · This recipient has completed signing.' : 'This recipient has completed signing.'}
         </Text>
       </Section>
     </>

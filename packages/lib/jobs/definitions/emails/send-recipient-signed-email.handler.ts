@@ -81,6 +81,8 @@ export const run = async ({ payload, io }: { payload: TSendRecipientSignedEmailJ
     meta: envelope.documentMeta,
   });
 
+  const isZh = (emailLanguage ?? '').toLowerCase().startsWith('zh');
+
   const assetBaseUrl = NEXT_PUBLIC_WEBAPP_URL() || 'http://localhost:3000';
 
 
@@ -107,7 +109,7 @@ export const run = async ({ payload, io }: { payload: TSendRecipientSignedEmailJ
         address: owner.email,
       },
       from: senderEmail,
-      subject: `${recipientReference} 已签署 "${envelope.title}" · Recipient signed`,
+      subject: isZh ? `${recipientReference} 已签署 "${envelope.title}" · Recipient signed` : `${recipientReference} signed "${envelope.title}"`,
       html,
       text,
     });

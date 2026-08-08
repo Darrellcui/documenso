@@ -55,6 +55,8 @@ export const run = async ({ payload, io }: { payload: TSendDocumentCancelledEmai
       meta: envelope.documentMeta,
     });
 
+  const isZh = (emailLanguage ?? '').toLowerCase().startsWith('zh');
+
   const { documentMeta, user: documentOwner } = envelope;
 
   // Don't send cancellation emails if the organisation has email sending disabled or the owner is disabled (e.g. banned).
@@ -146,7 +148,7 @@ export const run = async ({ payload, io }: { payload: TSendDocumentCancelledEmai
           },
           from: senderEmail,
           replyTo: replyToEmail,
-          subject: `文件 "${envelope.title}" 已取消 · Document Cancelled`,
+          subject: isZh ? `文件 "${envelope.title}" 已取消 · Document Cancelled` : `Document "${envelope.title}" cancelled`,
           html,
           text,
         });

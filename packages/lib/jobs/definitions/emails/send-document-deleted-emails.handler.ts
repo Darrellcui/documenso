@@ -24,6 +24,8 @@ export const run = async ({ payload, io }: { payload: TSendDocumentDeletedEmails
     meta,
   });
 
+  const isZh = (emailLanguage ?? '').toLowerCase().startsWith('zh');
+
   // Don't send cancellation emails if the organisation has email sending
   // disabled. Re-checked here (not just at enqueue time) because the org can be
   // disabled between the delete request and this job running.
@@ -58,7 +60,7 @@ export const run = async ({ payload, io }: { payload: TSendDocumentDeletedEmails
         },
         from: senderEmail,
         replyTo: replyToEmail,
-        subject: `文件已取消 · Document Cancelled`,
+        subject: isZh ? '文件已取消 · Document Cancelled' : 'Document cancelled',
         html,
         text,
       });

@@ -71,6 +71,8 @@ export const run = async ({ payload, io }: { payload: TSendSigningRejectionEmail
     meta: envelope.documentMeta,
   });
 
+  // Chinese documents get a bilingual subject; other languages get English.
+  const isZh = (emailLanguage ?? '').toLowerCase().startsWith('zh');
 
   // Send confirmation email to the recipient who rejected.
   // Skipped when the organisation has email sending disabled, since this is sent on its behalf.
@@ -101,7 +103,7 @@ export const run = async ({ payload, io }: { payload: TSendSigningRejectionEmail
         },
         from: senderEmail,
         replyTo: replyToEmail,
-        subject: `文件 "${envelope.title}" 拒签已确认 · Rejection Confirmed`,
+        subject: isZh ? `文件 "${envelope.title}" 拒签已确认 · Rejection Confirmed` : `Rejection confirmed for "${envelope.title}"`,
         html,
         text,
       });
@@ -133,7 +135,7 @@ export const run = async ({ payload, io }: { payload: TSendSigningRejectionEmail
         address: documentOwner.email,
       },
       from: DOCUMENSO_INTERNAL_EMAIL, // Purposefully using internal email here.
-      subject: `文件 "${envelope.title}" 已被 ${recipient.name} 拒签 · Document Rejected`,
+      subject: isZh ? `文件 "${envelope.title}" 已被 ${recipient.name} 拒签 · Document Rejected` : `Document "${envelope.title}" rejected by ${recipient.name}`,
       html,
       text,
     });

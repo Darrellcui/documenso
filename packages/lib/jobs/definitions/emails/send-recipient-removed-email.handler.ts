@@ -47,6 +47,8 @@ export const run = async ({ payload, io }: { payload: TSendRecipientRemovedEmail
       meta: envelope.documentMeta,
     });
 
+  const isZh = (emailLanguage ?? '').toLowerCase().startsWith('zh');
+
   // Don't send the removal email if the organisation has email sending disabled.
   if (emailsDisabled) {
     return;
@@ -94,7 +96,7 @@ export const run = async ({ payload, io }: { payload: TSendRecipientRemovedEmail
       },
       from: senderEmail,
       replyTo: replyToEmail,
-      subject: `您已被移出某文件 · You have been removed from a document`,
+      subject: isZh ? '您已被移出某文件 · You have been removed from a document' : 'You have been removed from a document',
       html,
       text,
     });

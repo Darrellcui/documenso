@@ -46,6 +46,8 @@ export const run = async ({ payload }: { payload: TSendDocumentPendingEmailJobDe
     meta: envelope.documentMeta,
   });
 
+  const isZh = (emailLanguage ?? '').toLowerCase().startsWith('zh');
+
   // Don't send any emails if the organisation has email sending disabled.
   if (emailsDisabled) {
     return;
@@ -90,7 +92,7 @@ export const run = async ({ payload }: { payload: TSendDocumentPendingEmailJobDe
     },
     from: senderEmail,
     replyTo: replyToEmail,
-    subject: `等待其他签署方完成 · Waiting for others to sign`,
+    subject: isZh ? '等待其他签署方完成 · Waiting for others to sign' : 'Waiting for others to sign',
     html,
     text,
   });

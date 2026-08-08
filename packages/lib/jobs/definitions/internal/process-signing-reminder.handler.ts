@@ -127,10 +127,17 @@ export const run = async ({ payload, io }: { payload: TProcessSigningReminderJob
 
 
 
-  let emailSubject = `温馨提醒：请处理文件 "${envelope.title}" · Reminder: "${envelope.title}"`;
+  // Chinese documents get a bilingual subject; other languages get English.
+  const isZh = (emailLanguage ?? '').toLowerCase().startsWith('zh');
+
+  let emailSubject = isZh
+    ? `温馨提醒：请处理文件 "${envelope.title}" · Reminder: "${envelope.title}"`
+    : `Reminder: "${envelope.title}"`;
 
   if (organisationType === OrganisationType.ORGANISATION) {
-    emailSubject = `温馨提醒：${envelope.team.name} 邀请您处理文件 · Reminder from ${envelope.team.name}`;
+    emailSubject = isZh
+      ? `温馨提醒：${envelope.team.name} 邀请您处理文件 · Reminder from ${envelope.team.name}`
+      : `Reminder from ${envelope.team.name}`;
   }
 
   const customEmailTemplate = {
@@ -141,7 +148,7 @@ export const run = async ({ payload, io }: { payload: TProcessSigningReminderJob
 
   if (envelope.documentMeta.subject) {
     emailSubject = renderCustomEmailTemplate(
-      `温馨提醒 · Reminder: ${envelope.documentMeta.subject}`,
+      isZh ? `温馨提醒 · Reminder: ${envelope.documentMeta.subject}` : `Reminder: ${envelope.documentMeta.subject}`,
       customEmailTemplate,
     );
   }

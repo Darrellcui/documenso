@@ -68,6 +68,8 @@ export const run = async ({ payload, io }: { payload: TSendOwnerRecipientExpired
     meta: documentMeta,
   });
 
+  const isZh = (emailLanguage ?? '').toLowerCase().startsWith('zh');
+
   // Don't send any emails if the organisation has email sending disabled.
   if (emailsDisabled) {
     return;
@@ -100,7 +102,7 @@ export const run = async ({ payload, io }: { payload: TSendOwnerRecipientExpired
         address: documentOwner.email,
       },
       from: senderEmail,
-      subject: `签署期限已过期："${recipient.name || recipient.email}" · Signing window expired`,
+      subject: isZh ? `签署期限已过期："${recipient.name || recipient.email}" · Signing window expired` : `Signing window expired for "${recipient.name || recipient.email}"`,
       html,
       text,
     });
