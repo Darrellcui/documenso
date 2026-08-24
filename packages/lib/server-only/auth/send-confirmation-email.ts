@@ -1,7 +1,6 @@
 import { mailer } from '@documenso/email/mailer';
 import { ConfirmEmailTemplate } from '@documenso/email/templates/confirm-email';
 import { prisma } from '@documenso/prisma';
-import { msg } from '@lingui/core/macro';
 import { createElement } from 'react';
 
 import { getI18nInstance } from '../../client-only/providers/i18n-server';
@@ -52,13 +51,16 @@ export const sendConfirmationEmail = async ({ userId }: SendConfirmationEmailPro
 
   const i18n = await getI18nInstance();
 
+  // Chinese locales get a bilingual subject, matching the document emails.
+  const isZh = i18n.locale.toLowerCase().startsWith('zh');
+
   return mailer.sendMail({
     to: {
       address: user.email,
       name: user.name || '',
     },
     from: DOCUMENSO_INTERNAL_EMAIL,
-    subject: i18n._(msg`Please confirm your email`),
+    subject: isZh ? '请确认您的邮箱 · Confirm your email' : 'Confirm your Xenvera Sign email',
     html,
     text,
   });

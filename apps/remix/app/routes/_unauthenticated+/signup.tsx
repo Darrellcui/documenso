@@ -1,4 +1,5 @@
 import {
+  getAllowedSignupDomains,
   IS_GOOGLE_SSO_ENABLED,
   IS_MICROSOFT_SSO_ENABLED,
   IS_OIDC_SSO_ENABLED,
@@ -34,11 +35,18 @@ export function loader({ request }: Route.LoaderArgs) {
 
   returnTo = isValidReturnTo(returnTo) ? normalizeReturnTo(returnTo) : undefined;
 
+  // When exactly one signup domain is allowed, the form locks the address to it
+  // instead of accepting a free-form email. Mirrors the server-side check in
+  // the signup route so the rule is visible before submitting, not after.
+  const allowedDomains = getAllowedSignupDomains();
+  const lockedEmailDomain = allowedDomains.length === 1 ? allowedDomains[0] : undefined;
+
   return {
     isEmailPasswordSignupEnabled,
     isGoogleSignupEnabled,
     isMicrosoftSignupEnabled,
     isOidcSignupEnabled,
+    lockedEmailDomain,
     returnTo,
   };
 }
@@ -49,6 +57,7 @@ export default function SignUp({ loaderData }: Route.ComponentProps) {
     isGoogleSignupEnabled,
     isMicrosoftSignupEnabled,
     isOidcSignupEnabled,
+    lockedEmailDomain,
     returnTo,
   } = loaderData;
 
@@ -59,6 +68,7 @@ export default function SignUp({ loaderData }: Route.ComponentProps) {
       isGoogleSignupEnabled={isGoogleSignupEnabled}
       isMicrosoftSignupEnabled={isMicrosoftSignupEnabled}
       isOidcSignupEnabled={isOidcSignupEnabled}
+      lockedEmailDomain={lockedEmailDomain}
       returnTo={returnTo}
     />
   );

@@ -1,4 +1,3 @@
-import communityCardsImage from '@documenso/assets/images/community-cards.png';
 import { authClient } from '@documenso/auth/client';
 import { useAnalytics } from '@documenso/lib/client-only/hooks/use-analytics';
 import { AppError, AppErrorCode } from '@documenso/lib/errors/app-error';
@@ -20,32 +19,48 @@ import { useLingui } from '@lingui/react';
 import { Trans } from '@lingui/react/macro';
 import type { TurnstileInstance } from '@marsidev/react-turnstile';
 import { Turnstile } from '@marsidev/react-turnstile';
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { FaIdCardClip } from 'react-icons/fa6';
 import { FcGoogle } from 'react-icons/fc';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { z } from 'zod';
 
-import { UserProfileTimur } from '~/components/general/user-profile-timur';
+import { BrandingLogo } from '~/components/general/branding-logo';
 
-export const ZSignUpFormSchema = z
-  .object({
-    name: ZNameSchema,
-    email: zEmail().min(1),
-    password: ZPasswordSchema,
-    signature: z.string().min(1, { message: msg`We need your signature to sign documents`.id }),
-  })
-  .refine(
-    (data) => {
-      const { name, email, password } = data;
-      return !password.includes(name) && !password.includes(email.split('@')[0]);
-    },
-    {
-      message: msg`Password should not be common or based on personal information`.id,
-      path: ['password'],
-    },
-  );
+/** Local part of an address, i.e. everything before the "@" (RFC 5322 dot-atom). */
+const EMAIL_LOCAL_PART_REGEX = /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*$/;
+
+/**
+ * When signup is restricted to a single domain the email field accepts only the
+ * local part and the domain is appended on submit, so `email` holds the local
+ * part while the form is open. Otherwise it holds a full address.
+ */
+export const buildSignUpFormSchema = (lockedEmailDomain?: string) =>
+  z
+    .object({
+      name: ZNameSchema,
+      email: lockedEmailDomain
+        ? z
+            .string()
+            .min(1)
+            .regex(EMAIL_LOCAL_PART_REGEX, { message: msg`Enter the part before the @ — letters, digits, dots.`.id })
+        : zEmail().min(1),
+      password: ZPasswordSchema,
+      signature: z.string().min(1, { message: msg`We need your signature to sign documents`.id }),
+    })
+    .refine(
+      (data) => {
+        const { name, email, password } = data;
+        return !password.includes(name) && !password.includes(email.split('@')[0]);
+      },
+      {
+        message: msg`Password should not be common or based on personal information`.id,
+        path: ['password'],
+      },
+    );
+
+export const ZSignUpFormSchema = buildSignUpFormSchema();
 
 export const SIGNUP_ERROR_MESSAGES: Record<string, MessageDescriptor> = {
   SIGNUP_DISABLED: msg`Signup is currently disabled or not available for your email domain.`,
@@ -63,7 +78,24 @@ export type SignUpFormProps = {
   isGoogleSignupEnabled?: boolean;
   isMicrosoftSignupEnabled?: boolean;
   isOidcSignupEnabled?: boolean;
+  /** Set when signup is restricted to exactly one domain; locks the address suffix. */
+  lockedEmailDomain?: string;
   returnTo?: string;
+};
+
+/** Strips a locked domain off a prefilled address so only the local part is shown. */
+const toLocalPart = (email: string | undefined, lockedEmailDomain: string | undefined) => {
+  if (!email) {
+    return '';
+  }
+
+  if (!lockedEmailDomain || !email.includes('@')) {
+    return email;
+  }
+
+  const [localPart, domain] = email.split('@');
+
+  return domain.toLowerCase() === lockedEmailDomain.toLowerCase() ? localPart : '';
 };
 
 export const SignUpForm = ({
@@ -73,6 +105,7 @@ export const SignUpForm = ({
   isGoogleSignupEnabled,
   isMicrosoftSignupEnabled,
   isOidcSignupEnabled,
+  lockedEmailDomain,
   returnTo,
 }: SignUpFormProps) => {
   const { _ } = useLingui();
@@ -89,20 +122,25 @@ export const SignUpForm = ({
 
   const hasSocialAuthEnabled = isGoogleSignupEnabled || isMicrosoftSignupEnabled || isOidcSignupEnabled;
 
+  const formSchema = useMemo(() => buildSignUpFormSchema(lockedEmailDomain), [lockedEmailDomain]);
+
   const form = useForm<TSignUpFormSchema>({
     values: {
       name: '',
-      email: initialEmail ?? '',
+      email: toLocalPart(initialEmail, lockedEmailDomain),
       password: '',
       signature: '',
     },
     mode: 'onChange',
-    resolver: zodResolver(ZSignUpFormSchema),
+    resolver: zodResolver(formSchema),
   });
 
   const isSubmitting = form.formState.isSubmitting;
 
-  const onFormSubmit = async ({ name, email, password, signature }: TSignUpFormSchema) => {
+  const onFormSubmit = async ({ name, email: emailInput, password, signature }: TSignUpFormSchema) => {
+    // With a locked domain the field carries only the local part.
+    const email = lockedEmailDomain ? `${emailInput}@${lockedEmailDomain}` : emailInput;
+
     try {
       let token: string | undefined;
 
@@ -202,47 +240,75 @@ export const SignUpForm = ({
     const email = params.get('email');
 
     if (email) {
-      form.setValue('email', email);
+      form.setValue('email', toLocalPart(email, lockedEmailDomain));
     }
-  }, [form]);
+  }, [form, lockedEmailDomain]);
 
   return (
     <div className={cn('flex justify-center gap-x-12', className)}>
-      <div className="relative hidden flex-1 overflow-hidden rounded-xl border border-border xl:flex">
-        <div className="absolute -inset-8 -z-[2] backdrop-blur">
-          <img
-            src={communityCardsImage}
-            alt="community-cards"
-            className="h-full w-full object-cover dark:brightness-95 dark:contrast-[70%] dark:invert"
-          />
-        </div>
+      {/* Brand panel — internal tool, so it states what this is rather than selling it. */}
+      <div className="relative hidden flex-1 overflow-hidden rounded-xl border border-border bg-primary xl:flex">
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 opacity-[0.07]"
+          style={{
+            backgroundImage:
+              'linear-gradient(rgba(255,255,255,0.9) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.9) 1px, transparent 1px)',
+            backgroundSize: '32px 32px',
+          }}
+        />
 
-        <div className="absolute -inset-8 -z-[1] bg-background/50 backdrop-blur-[2px]" />
+        <div className="relative flex h-full w-full flex-col justify-between p-10">
+          <BrandingLogo className="h-9 w-auto brightness-0 invert" />
 
-        <div className="relative flex h-full w-full flex-col items-center justify-evenly">
-          <div className="rounded-2xl border bg-background px-4 py-1 font-medium text-sm">
-            <Trans>User profiles are here!</Trans>
+          <div>
+            <h2 className="max-w-md font-semibold text-3xl text-white leading-tight">
+              <Trans>Xenvera Sign</Trans>
+            </h2>
+            <p className="mt-1 font-medium text-base text-white/60">
+              <Trans>Internal e-signature workspace</Trans>
+            </p>
+
+            <p className="mt-6 max-w-md text-base text-white/70 leading-relaxed">
+              <Trans>
+                Send contracts and supplier agreements for signature, track their status, and keep every signed copy in
+                one place.
+              </Trans>
+            </p>
           </div>
 
-          <div className="w-full max-w-md">
-            <UserProfileTimur rows={2} className="rounded-2xl border border-border bg-background shadow-md" />
+          <div className="space-y-2.5">
+            {[
+              msg`Accounts are for Xenvera staff only`,
+              msg`Suppliers sign by link — no account needed`,
+              msg`Every signed document is stored and auditable`,
+            ].map((item) => (
+              <div key={item.id} className="flex items-center gap-2.5 text-sm text-white/70">
+                <span aria-hidden="true" className="text-white/40">
+                  —
+                </span>
+                {_(item)}
+              </div>
+            ))}
           </div>
-
-          <div />
         </div>
       </div>
 
       <div className="relative z-10 flex min-h-[min(850px,80vh)] w-full max-w-lg flex-col rounded-xl border border-border bg-neutral-100 p-6 dark:bg-background">
         <div className="h-20">
           <h1 className="font-semibold text-xl md:text-2xl">
-            <Trans>Create a new account</Trans>
+            <Trans>Create your account</Trans>
           </h1>
 
           <p className="mt-2 text-muted-foreground text-xs md:text-sm">
-            <Trans>
-              Create your account and start using state-of-the-art document signing. Open and beautiful signing is
-              within your grasp.
-            </Trans>
+            {lockedEmailDomain ? (
+              <Trans>
+                Xenvera Sign accounts are for team members with an @{lockedEmailDomain} address. Your signature is drawn
+                once here and reused on every document you sign.
+              </Trans>
+            ) : (
+              <Trans>Your signature is drawn once here and reused on every document you sign.</Trans>
+            )}
           </p>
         </div>
 
@@ -272,14 +338,50 @@ export const SignUpForm = ({
                   <FormField
                     control={form.control}
                     name="email"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <FormItem>
                         <FormLabel>
                           <Trans>Email Address</Trans>
                         </FormLabel>
-                        <FormControl>
-                          <Input type="email" {...field} />
-                        </FormControl>
+
+                        {lockedEmailDomain ? (
+                          // FormControl wraps the input itself (not this row) so the
+                          // label's htmlFor still targets the real field.
+                          <div
+                            className={cn(
+                              'flex h-10 w-full items-stretch overflow-hidden rounded-md border border-input bg-background ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2',
+                              fieldState.error && '!ring-destructive ring-2',
+                            )}
+                          >
+                            <FormControl>
+                              <input
+                                {...field}
+                                type="text"
+                                autoComplete="username"
+                                spellCheck={false}
+                                autoCapitalize="none"
+                                placeholder="name"
+                                className="min-w-0 flex-1 bg-transparent px-3 py-2 text-base outline-none placeholder:text-muted-foreground/40 md:text-sm"
+                              />
+                            </FormControl>
+                            <span
+                              aria-hidden="true"
+                              className="flex select-none items-center border-input border-l bg-muted px-3 font-medium text-muted-foreground text-sm"
+                            >
+                              @{lockedEmailDomain}
+                            </span>
+                          </div>
+                        ) : (
+                          <FormControl>
+                            <Input type="email" {...field} />
+                          </FormControl>
+                        )}
+
+                        {lockedEmailDomain && (
+                          <p className="text-muted-foreground text-xs">
+                            <Trans>Only @{lockedEmailDomain} addresses can create an account.</Trans>
+                          </p>
+                        )}
                         <FormMessage />
                       </FormItem>
                     )}
@@ -392,7 +494,7 @@ export const SignUpForm = ({
               <p className="mt-4 text-muted-foreground text-sm">
                 <Trans>
                   Already have an account?{' '}
-                  <Link to="/signin" className="text-documenso-700 duration-200 hover:opacity-70">
+                  <Link to="/signin" className="font-medium text-primary duration-200 hover:opacity-70">
                     Sign in instead
                   </Link>
                 </Trans>
@@ -408,22 +510,11 @@ export const SignUpForm = ({
         </Form>
         <p className="mt-6 text-muted-foreground text-xs">
           <Trans>
-            By proceeding, you agree to our{' '}
-            <Link
-              to="https://documen.so/terms"
-              target="_blank"
-              className="text-documenso-700 duration-200 hover:opacity-70"
-            >
-              Terms of Service
-            </Link>{' '}
-            and{' '}
-            <Link
-              to="https://documen.so/privacy"
-              target="_blank"
-              className="text-documenso-700 duration-200 hover:opacity-70"
-            >
-              Privacy Policy
-            </Link>
+            Xenvera Sign is an internal system of Xenvera Innovation. Accounts and documents are for company business
+            only. Need help? Email{' '}
+            <a href="mailto:support@xenvera.com" className="font-medium text-primary duration-200 hover:opacity-70">
+              support@xenvera.com
+            </a>
             .
           </Trans>
         </p>
