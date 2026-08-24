@@ -100,6 +100,14 @@ export const createOrganisationMemberInvites = async ({
     return true;
   });
 
+  // Inviting an address that already has a pending invite used to drop it here
+  // and still report success, so the invite silently went nowhere and the only
+  // way out was the Resend action on the pending-invites table. Re-send the
+  // existing invite instead, which is what the action was asking for.
+  const invitesToResend = organisation.invites.filter((invite) =>
+    invitations.some((invitation) => invitation.email === invite.email),
+  );
+
   const unauthorizedRoleAccess = usersToInvite.some(
     ({ organisationRole }) => !isOrganisationRoleWithinUserHierarchy(currentOrganisationMemberRole, organisationRole),
   );
@@ -137,8 +145,10 @@ export const createOrganisationMemberInvites = async ({
     data: organisationMemberInvites,
   });
 
+  const invitesToEmail = [...organisationMemberInvites, ...invitesToResend];
+
   const sendEmailResult = await Promise.allSettled(
-    organisationMemberInvites.map(async ({ email, token }) =>
+    invitesToEmail.map(async ({ email, token }) =>
       sendOrganisationMemberInviteEmail({
         email,
         token,
@@ -157,7 +167,7 @@ export const createOrganisationMemberInvites = async ({
 
     throw new AppError('EmailDeliveryFailed', {
       message: 'Failed to send invite emails to one or more users.',
-      userMessage: `Failed to send invites to ${sendEmailResultErrorList.length}/${organisationMemberInvites.length} users.`,
+      userMessage: `Failed to send invites to ${sendEmailResultErrorList.length}/${invitesToEmail.length} users.`,
     });
   }
 };
@@ -217,7 +227,7 @@ export const sendOrganisationMemberInviteEmail = async ({
   await emailTransport.sendMail({
     to: email,
     from: senderEmail,
-    subject: i18n._(msg`You have been invited to join ${organisation.name} on Documenso`),
+    subject: i18n._(msg`You have been invited to join ${organisation.name} on Xenvera Sign`),
     html,
     text,
   });
