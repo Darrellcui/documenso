@@ -247,29 +247,32 @@ export const SignUpForm = ({
   return (
     <div className={cn('flex justify-center gap-x-12', className)}>
       {/* Brand panel — internal tool, so it states what this is rather than selling it. */}
-      <div className="relative hidden flex-1 overflow-hidden rounded-xl border border-border bg-primary xl:flex">
+      <div className="relative hidden flex-1 overflow-hidden rounded-xl border border-border bg-background xl:flex">
         <div
           aria-hidden="true"
-          className="absolute inset-0 opacity-[0.07]"
+          className="absolute inset-0 opacity-[0.05]"
           style={{
             backgroundImage:
-              'linear-gradient(rgba(255,255,255,0.9) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.9) 1px, transparent 1px)',
+              'linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)',
             backgroundSize: '32px 32px',
           }}
         />
 
+        {/* Accent rule — the only saturated colour on the panel. */}
+        <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-primary" />
+
         <div className="relative flex h-full w-full flex-col justify-between p-10">
-          <BrandingLogo className="h-9 w-auto brightness-0 invert" />
+          <BrandingLogo className="h-9 w-auto" />
 
           <div>
-            <h2 className="max-w-md font-semibold text-3xl text-white leading-tight">
+            <h2 className="max-w-md font-semibold text-3xl text-foreground leading-tight">
               <Trans>Xenvera Sign</Trans>
             </h2>
-            <p className="mt-1 font-medium text-base text-white/60">
+            <p className="mt-1 font-medium text-base text-primary">
               <Trans>Internal e-signature workspace</Trans>
             </p>
 
-            <p className="mt-6 max-w-md text-base text-white/70 leading-relaxed">
+            <p className="mt-6 max-w-md text-base text-muted-foreground leading-relaxed">
               <Trans>
                 Send contracts and supplier agreements for signature, track their status, and keep every signed copy in
                 one place.
@@ -277,16 +280,14 @@ export const SignUpForm = ({
             </p>
           </div>
 
-          <div className="space-y-2.5">
+          <div className="space-y-3">
             {[
               msg`Accounts are for Xenvera staff only`,
               msg`Suppliers sign by link — no account needed`,
               msg`Every signed document is stored and auditable`,
             ].map((item) => (
-              <div key={item.id} className="flex items-center gap-2.5 text-sm text-white/70">
-                <span aria-hidden="true" className="text-white/40">
-                  —
-                </span>
+              <div key={item.id} className="flex items-center gap-3 text-muted-foreground text-sm">
+                <span aria-hidden="true" className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-primary/50" />
                 {_(item)}
               </div>
             ))}
