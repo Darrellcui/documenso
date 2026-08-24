@@ -14771,3 +14771,63 @@ msgstr "您的验证码："
 #: apps/remix/app/routes/_authenticated+/o.$orgUrl.settings.sso.tsx
 msgid "your-domain.com another-domain.com"
 msgstr "your-domain.com another-domain.com"
+
+#: apps/remix/app/components/forms/signup.tsx
+msgid "Create your account"
+msgstr "创建您的账号"
+
+#: apps/remix/app/components/forms/signup.tsx
+msgid "Xenvera Sign accounts are for team members with an @{lockedEmailDomain} address. Your signature is drawn once here and reused on every document you sign."
+msgstr "Xenvera Sign 账号仅限使用 @{lockedEmailDomain} 邮箱的团队成员注册。您的签名在此绘制一次，之后签署所有文件时都会复用。"
+
+#: apps/remix/app/components/forms/signup.tsx
+msgid "Your signature is drawn once here and reused on every document you sign."
+msgstr "您的签名在此绘制一次，之后签署所有文件时都会复用。"
+
+#: apps/remix/app/components/forms/signup.tsx
+msgid "Only @{lockedEmailDomain} addresses can create an account."
+msgstr "仅 @{lockedEmailDomain} 邮箱可以注册账号。"
+
+#: apps/remix/app/components/forms/signup.tsx
+msgid "Enter the part before the @ — letters, digits, dots."
+msgstr "请输入 @ 前面的部分（字母、数字、点）。"
+
+#: apps/remix/app/components/forms/signup.tsx
+msgid "Xenvera Sign"
+msgstr "Xenvera Sign"
+
+#: apps/remix/app/components/forms/signup.tsx
+msgid "Internal e-signature workspace"
+msgstr "内部电子签署工作台"
+
+#: apps/remix/app/components/forms/signup.tsx
+msgid "Send contracts and supplier agreements for signature, track their status, and keep every signed copy in one place."
+msgstr "发送合同与供应商协议进行签署，跟踪签署状态，所有已签文件集中留存。"
+
+#: apps/remix/app/components/forms/signup.tsx
+msgid "Accounts are for Xenvera staff only"
+msgstr "账号仅限 Xenvera 员工注册"
+
+#: apps/remix/app/components/forms/signup.tsx
+msgid "Suppliers sign by link — no account needed"
+msgstr "供应商凭链接签署，无需注册账号"
+
+#: apps/remix/app/components/forms/signup.tsx
+msgid "Every signed document is stored and auditable"
+msgstr "所有已签文件均留档并可审计"
+
+#: apps/remix/app/components/forms/signup.tsx
+msgid "Xenvera Sign is an internal system of Xenvera Innovation. Accounts and documents are for company business only. Need help? Email <0>support@xenvera.com</0>."
+msgstr "Xenvera Sign 是 Xenvera Innovation 的内部系统，账号与文件仅供公司业务使用。需要帮助请联系 <0>support@xenvera.com</0>。"
+
+#: packages/email/templates/organisation-invite.tsx
+msgid "Join {organisationName} on Xenvera Sign"
+msgstr "加入 {organisationName}，使用 Xenvera Sign"
+
+#: packages/email/templates/organisation-invite.tsx
+msgid "Accept invitation to join an organisation on Xenvera Sign"
+msgstr "接受加入 Xenvera Sign 组织的邀请"
+
+#: packages/lib/server-only/organisation/create-organisation-member-invites.ts
+msgid "You have been invited to join {0} on Xenvera Sign"
+msgstr "您被邀请加入 {0}，使用 Xenvera Sign"
