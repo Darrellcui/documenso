@@ -356,6 +356,18 @@ export const SignUpForm = ({
                             <FormControl>
                               <input
                                 {...field}
+                                onChange={(e) => {
+                                  // Pasting a full address is the obvious thing to
+                                  // do here, so drop the suffix rather than reject it.
+                                  const value = e.target.value;
+                                  const suffix = `@${lockedEmailDomain}`;
+
+                                  field.onChange(
+                                    value.toLowerCase().endsWith(suffix.toLowerCase())
+                                      ? value.slice(0, -suffix.length)
+                                      : value,
+                                  );
+                                }}
                                 type="text"
                                 autoComplete="username"
                                 spellCheck={false}
