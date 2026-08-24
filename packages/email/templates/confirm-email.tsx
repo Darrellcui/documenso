@@ -1,5 +1,3 @@
-import { useLingui } from '@lingui/react';
-
 import { Body, Container, Head, Html, Preview, Section } from '../components';
 import { TemplateBrandingLogo } from '../template-components/template-branding-logo';
 import type { TemplateConfirmationEmailProps } from '../template-components/template-confirmation-email';
@@ -10,13 +8,7 @@ export const ConfirmEmailTemplate = ({
   confirmationLink,
   assetBaseUrl = 'http://localhost:3002',
 }: TemplateConfirmationEmailProps) => {
-  const { i18n } = useLingui();
-
-  const isZh = i18n.locale.toLowerCase().startsWith('zh');
-
-  const previewText = isZh
-    ? '确认邮箱即可开始使用 Xenvera Sign'
-    : 'Confirm your email to start using Xenvera Sign';
+  const previewText = '确认邮箱即可开始使用 · Confirm your email to get started';
 
   return (
     <Html>

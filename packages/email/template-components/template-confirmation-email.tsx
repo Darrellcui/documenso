@@ -1,6 +1,3 @@
-import { useLingui } from '@lingui/react';
-import { Trans } from '@lingui/react/macro';
-
 import { Button, Section, Text } from '../components';
 import { TemplateDocumentImage } from './template-document-image';
 
@@ -9,31 +6,32 @@ export type TemplateConfirmationEmailProps = {
   assetBaseUrl: string;
 };
 
+/**
+ * Layout follows the document emails (brand line, headline, body, action
+ * button) but is unconditionally bilingual: document emails switch on the
+ * document's language because they reach external signers, whereas this one is
+ * only ever sent to staff on the allowed signup domain. It is also rendered
+ * without a language hint, so the locale here is always the 'en' source anyway.
+ */
 export const TemplateConfirmationEmail = ({ confirmationLink, assetBaseUrl }: TemplateConfirmationEmailProps) => {
-  const { i18n } = useLingui();
-
-  // Matches the document emails: Chinese locales get a bilingual body, everyone
-  // else gets English only.
-  const isZh = i18n.locale.toLowerCase().startsWith('zh');
-
   return (
     <>
       <TemplateDocumentImage className="mt-6" assetBaseUrl={assetBaseUrl} />
 
       <Section className="flex-row items-center justify-center">
         <Text className="mx-auto mb-0 max-w-[80%] text-center font-semibold text-foreground text-lg">
-          {isZh ? '欢迎加入 Xenvera Sign' : 'Welcome to Xenvera Sign'}
+          欢迎加入 Xenvera Sign
+          <br />
+          Welcome to Xenvera Sign
         </Text>
 
         <Text className="mx-auto mt-1 mb-0 text-center text-muted-foreground text-sm">
-          {isZh ? 'Xenvera Innovation · 电子签署 E-Signature' : 'Xenvera Innovation · E-Signature'}
+          Xenvera Innovation · 电子签署 E-Signature
         </Text>
 
-        {isZh && (
-          <Text className="my-1 text-center text-base text-muted-foreground">
-            请点击下方按钮确认邮箱地址，即可开始使用。
-          </Text>
-        )}
+        <Text className="my-1 text-center text-base text-muted-foreground">
+          请点击下方按钮确认邮箱地址，激活您的账号。
+        </Text>
 
         <Text className="mt-1 mb-1 text-center text-muted-foreground text-sm">
           Please confirm your email address to activate your account.
@@ -44,13 +42,15 @@ export const TemplateConfirmationEmail = ({ confirmationLink, assetBaseUrl }: Te
             className="inline-flex items-center justify-center rounded-lg bg-primary px-6 py-3 text-center font-medium text-base text-primary-foreground no-underline"
             href={confirmationLink}
           >
-            {isZh ? '确认邮箱 · Confirm Email' : 'Confirm Email'}
+            确认邮箱 · Confirm Email
           </Button>
 
           <Text className="mt-8 text-center text-muted-foreground text-sm italic">
-            <Trans>
-              You can also copy and paste this link into your browser: {confirmationLink} (link expires in 1 hour)
-            </Trans>
+            也可复制以下链接到浏览器打开（1 小时内有效）：
+            <br />
+            You can also copy this link into your browser (expires in 1 hour):
+            <br />
+            {confirmationLink}
           </Text>
         </Section>
       </Section>
