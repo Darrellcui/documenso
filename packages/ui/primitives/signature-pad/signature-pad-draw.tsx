@@ -207,6 +207,7 @@ export const SignaturePadDraw = ({ className, value, onChange, ...props }: Signa
     setLines([]);
     setCurrentLine([]);
     setIsPressed(false);
+    setIsSignatureValid(null);
   };
 
   const onUndoClick = () => {
@@ -226,12 +227,18 @@ export const SignaturePadDraw = ({ className, value, onChange, ...props }: Signa
       ctx?.putImageData($imageData.current, 0, 0);
     }
 
+    if (ctx) {
+      ctx.fillStyle = selectedColor;
+    }
+
     newLines.forEach((line) => {
       const pathData = new Path2D(getSvgPathFromStroke(getStroke(line, perfectFreehandOptions)));
       ctx?.fill(pathData);
     });
 
-    onChange?.($el.current.toDataURL());
+    const isValidSignature = checkSignatureValidity($el);
+    setIsSignatureValid(isValidSignature ? true : newLines.length === 0 ? null : false);
+    onChange?.(isValidSignature ? $el.current.toDataURL() : '');
   };
 
   unsafe_useEffectOnce(() => {
