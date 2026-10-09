@@ -42,6 +42,8 @@ WORKDIR /app
 ENV HUSKY 0
 ENV DOCKER_OUTPUT 1
 ENV NEXT_TELEMETRY_DISABLED 1
+# The full Remix typecheck exceeds Node's default ~2 GB heap during production builds.
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 
 # Encryption keys
 ARG NEXT_PRIVATE_ENCRYPTION_KEY="CAFEBABE"

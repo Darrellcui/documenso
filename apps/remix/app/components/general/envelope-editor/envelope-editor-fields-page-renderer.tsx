@@ -37,6 +37,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { fieldButtonList } from './envelope-editor-fields-drag-drop';
 import { EnvelopeRecipientSelectorCommand } from './envelope-recipient-selector';
 
+/** How far past a resize handle you can still grab it, in screen pixels. */
+const TRANSFORMER_ANCHOR_HIT_STROKE_PX = 24;
+
 export const EnvelopeEditorFieldsPageRenderer = ({ pageData }: { pageData: PageRenderData }) => {
   const { t, i18n } = useLingui();
   const { envelope, editorFields, getRecipientColorKey } = useCurrentEnvelopeEditor();
@@ -350,13 +353,29 @@ export const EnvelopeEditorFieldsPageRenderer = ({ pageData }: { pageData: PageR
       shouldOverdrawWholeArea: true,
       ignoreStroke: true,
       flipEnabled: false,
+      anchorStyleFunc: (anchor) => {
+        anchor.hitStrokeWidth(TRANSFORMER_ANCHOR_HIT_STROKE_PX / scale);
+      },
       boundBoxFunc: (oldBox, newBox) => {
-        // Enforce minimum size
-        if (newBox.width < 30 || newBox.height < 20) {
+        const boundedX = Math.max(0, newBox.x);
+        const boundedY = Math.max(0, newBox.y);
+        const boundedRight = Math.min(currentStage.width(), newBox.x + newBox.width);
+        const boundedBottom = Math.min(currentStage.height(), newBox.y + newBox.height);
+        const boundedWidth = boundedRight - boundedX;
+        const boundedHeight = boundedBottom - boundedY;
+
+        // Keep the complete field on the page and enforce a usable minimum size.
+        if (boundedWidth < 30 || boundedHeight < 20) {
           return oldBox;
         }
 
-        return newBox;
+        return {
+          ...newBox,
+          x: boundedX,
+          y: boundedY,
+          width: boundedWidth,
+          height: boundedHeight,
+        };
       },
     });
 
@@ -425,7 +444,7 @@ export const EnvelopeEditorFieldsPageRenderer = ({ pageData }: { pageData: PageR
       });
     });
 
-    currentStage.on('mouseup touchend', () => {
+    const finishSelection = () => {
       // do nothing if we didn't start selection
       if (!selectionRectangle.visible()) {
         return;
@@ -466,7 +485,19 @@ export const EnvelopeEditorFieldsPageRenderer = ({ pageData }: { pageData: PageR
         currentPageLayer.add(pendingFieldCreation);
         setPendingFieldCreation(pendingFieldCreation);
       }
-    });
+    };
+
+    const cancelSelection = () => {
+      selectionRectangle.setAttrs({
+        visible: false,
+        width: 0,
+        height: 0,
+      });
+      currentPageLayer.batchDraw();
+    };
+
+    currentStage.on('mouseup touchend', finishSelection);
+    currentStage.on('mouseleave touchcancel', cancelSelection);
 
     // Clicking empty stage area clears the selection. Field clicks -- including
     // Shift+click multi-select -- are handled by each field group's own click
@@ -491,6 +522,18 @@ export const EnvelopeEditorFieldsPageRenderer = ({ pageData }: { pageData: PageR
    */
   useEffect(() => {
     if (!pageLayer.current || !stage.current) {
+      return;
+    }
+
+    // Konva owns the live geometry while the pointer is down. The form values are
+    // intentionally committed only on dragend/transformend, so rendering them here
+    // would overwrite the in-progress node with stale coordinates and make it snap
+    // away from the pointer.
+    if (isFieldChanging) {
+      pageLayer.current.find('.field-overlap-highlight').forEach((node) => {
+        node.destroy();
+      });
+      pageLayer.current.batchDraw();
       return;
     }
 
@@ -709,10 +752,8 @@ export const EnvelopeEditorFieldsPageRenderer = ({ pageData }: { pageData: PageR
             selectedFieldFormId={selectedKonvaFieldGroups.map((field) => field.id())}
             style={{
               position: 'absolute',
-              top:
-                interactiveTransformer.current.y() + interactiveTransformer.current.getClientRect().height + 5 + 'px',
-              left:
-                interactiveTransformer.current.x() + interactiveTransformer.current.getClientRect().width / 2 + 'px',
+              top: `${interactiveTransformer.current.y() + interactiveTransformer.current.getClientRect().height + 5}px`,
+              left: `${interactiveTransformer.current.x() + interactiveTransformer.current.getClientRect().width / 2}px`,
               transform: 'translateX(-50%)',
               gap: '8px',
               pointerEvents: 'auto',
@@ -725,8 +766,8 @@ export const EnvelopeEditorFieldsPageRenderer = ({ pageData }: { pageData: PageR
         <div
           style={{
             position: 'absolute',
-            top: pendingFieldCreation.y() * scale + pendingFieldCreation.getClientRect().height + 5 + 'px',
-            left: pendingFieldCreation.x() * scale + pendingFieldCreation.getClientRect().width / 2 + 'px',
+            top: `${pendingFieldCreation.y() * scale + pendingFieldCreation.getClientRect().height + 5}px`,
+            left: `${pendingFieldCreation.x() * scale + pendingFieldCreation.getClientRect().width / 2}px`,
             transform: 'translateX(-50%)',
             zIndex: 50,
           }}
@@ -736,14 +777,15 @@ export const EnvelopeEditorFieldsPageRenderer = ({ pageData }: { pageData: PageR
           {fieldButtonList
             .filter((field) => !field.stamp)
             .map((field) => (
-            <button
-              key={field.type}
-              onClick={() => createFieldFromPendingTemplate(pendingFieldCreation, field.type)}
-              className="col-span-1 w-full flex-shrink-0 rounded-sm px-2 py-1 text-xs hover:bg-gray-100 hover:text-gray-600"
-            >
-              {t(field.name)}
-            </button>
-          ))}
+              <button
+                type="button"
+                key={field.type}
+                onClick={() => createFieldFromPendingTemplate(pendingFieldCreation, field.type)}
+                className="col-span-1 w-full flex-shrink-0 rounded-sm px-2 py-1 text-xs hover:bg-gray-100 hover:text-gray-600"
+              >
+                {t(field.name)}
+              </button>
+            ))}
         </div>
       )}
 

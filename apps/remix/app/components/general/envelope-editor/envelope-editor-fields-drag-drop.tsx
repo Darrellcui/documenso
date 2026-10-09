@@ -186,8 +186,8 @@ export const EnvelopeEditorFieldDragDrop = ({
       const pageNumber = parseInt($page.getAttribute('data-page-number') ?? '1', 10);
 
       // Calculate x and y as a percentage of the page width and height
-      let pageX = ((event.pageX - left) / width) * 100;
-      let pageY = ((event.pageY - top) / height) * 100;
+      let pageX = ((event.clientX - left) / width) * 100;
+      let pageY = ((event.clientY - top) / height) * 100;
 
       // Get the bounds as a percentage of the page width and height
       const fieldPageWidth = (fieldBounds.current.width / width) * 100;

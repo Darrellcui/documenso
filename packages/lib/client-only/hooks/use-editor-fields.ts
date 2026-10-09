@@ -2,6 +2,7 @@ import { getPdfPagesCount } from '@documenso/lib/constants/pdf-viewer';
 import type { TEditorEnvelope } from '@documenso/lib/types/envelope-editor';
 import { ZFieldMetaSchema } from '@documenso/lib/types/field-meta';
 import { nanoid } from '@documenso/lib/universal/id';
+import { restrictFieldPosition } from '@documenso/lib/utils/field-position';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { Field } from '@prisma/client';
 import { FieldType } from '@prisma/client';
@@ -137,7 +138,7 @@ export const useEditorFields = ({ envelope, handleFieldsUpdate }: EditorFieldsPr
       const field: TLocalField = {
         ...fieldData,
         formId: nanoid(12),
-        ...restrictFieldPosValues(fieldData),
+        ...restrictFieldPosition(fieldData),
       };
 
       append(field);
@@ -187,7 +188,7 @@ export const useEditorFields = ({ envelope, handleFieldsUpdate }: EditorFieldsPr
 
         update(index, {
           ...updatedField,
-          ...restrictFieldPosValues(updatedField),
+          ...restrictFieldPosition(updatedField),
         });
         triggerFieldsUpdate();
       }
@@ -205,6 +206,8 @@ export const useEditorFields = ({ envelope, handleFieldsUpdate }: EditorFieldsPr
         positionX: field.positionX + 3,
         positionY: field.positionY + 3,
       };
+
+      Object.assign(newField, restrictFieldPosition(newField));
 
       append(newField);
       triggerFieldsUpdate();
@@ -309,14 +312,5 @@ export const useEditorFields = ({ envelope, handleFieldsUpdate }: EditorFieldsPr
     setSelectedRecipient,
 
     resetForm,
-  };
-};
-
-const restrictFieldPosValues = (field: Pick<TLocalField, 'positionX' | 'positionY' | 'width' | 'height'>) => {
-  return {
-    positionX: Math.max(0, Math.min(100, field.positionX)),
-    positionY: Math.max(0, Math.min(100, field.positionY)),
-    width: Math.max(0, Math.min(100, field.width)),
-    height: Math.max(0, Math.min(100, field.height)),
   };
 };
