@@ -5,23 +5,116 @@ import { AppError } from '../../errors/app-error';
 import type { TSignatureFieldMeta } from '../../types/field-meta';
 import { resolveFieldOverflowMode } from '../../types/field-meta';
 import { calculateOverflowLayout } from './calculate-overflow-layout';
-import { createFieldHoverInteraction, upsertFieldGroup, upsertFieldRect } from './field-generic-items';
+import {
+  createFieldHoverInteraction,
+  konvaTextFontFamily,
+  upsertFieldGroup,
+  upsertFieldRect,
+} from './field-generic-items';
 import type { FieldToRender, RenderFieldElementOptions } from './field-renderer';
 import { calculateFieldPosition } from './field-renderer';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let SkiaImage: any;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let SkiaCanvas: any;
 
 void (async () => {
   if (typeof window === 'undefined') {
     const mod = await import('@documenso/skia-canvas');
     SkiaImage = mod.Image;
+    SkiaCanvas = mod.Canvas;
   }
 })();
 
-const getImageDimensions = (img: HTMLImageElement, fieldWidth: number, fieldHeight: number) => {
-  let imageWidth = img.width;
-  let imageHeight = img.height;
+type ImageCrop = { x: number; y: number; width: number; height: number };
+
+/**
+ * Alpha below this is treated as empty so anti-aliasing haze around strokes
+ * does not keep the margins alive.
+ */
+const SIGNATURE_TRIM_ALPHA_THRESHOLD = 8;
+
+/**
+ * Breathing room kept around the trimmed content, relative to its larger side.
+ */
+const SIGNATURE_TRIM_PADDING_RATIO = 0.04;
+
+/**
+ * Find the visible content of a signature image.
+ *
+ * Signature pads export the whole canvas, so a drawn signature carries wide
+ * transparent margins. Contain-fitting that into a flat field (the usual
+ * shape of a signature line) shrinks the ink to a fraction of the field.
+ * Cropping to the content lets the strokes use the full field.
+ *
+ * Images without transparency yield their full bounds, so they are unchanged.
+ */
+const getSignatureContentCrop = (img: HTMLImageElement, createCanvas: (w: number, h: number) => HTMLCanvasElement) => {
+  const { width, height } = img;
+
+  if (!width || !height) {
+    return null;
+  }
+
+  try {
+    const canvas = createCanvas(width, height);
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) {
+      return null;
+    }
+
+    ctx.drawImage(img, 0, 0, width, height);
+
+    const { data } = ctx.getImageData(0, 0, width, height);
+
+    let minX = width;
+    let minY = height;
+    let maxX = -1;
+    let maxY = -1;
+
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        if (data[(y * width + x) * 4 + 3] > SIGNATURE_TRIM_ALPHA_THRESHOLD) {
+          if (x < minX) minX = x;
+          if (x > maxX) maxX = x;
+          if (y < minY) minY = y;
+          if (y > maxY) maxY = y;
+        }
+      }
+    }
+
+    if (maxX < minX || maxY < minY) {
+      return null;
+    }
+
+    const padding = Math.round(Math.max(maxX - minX, maxY - minY) * SIGNATURE_TRIM_PADDING_RATIO);
+
+    const x = Math.max(0, minX - padding);
+    const y = Math.max(0, minY - padding);
+
+    const crop: ImageCrop = {
+      x,
+      y,
+      width: Math.min(width, maxX + 1 + padding) - x,
+      height: Math.min(height, maxY + 1 + padding) - y,
+    };
+
+    return crop;
+  } catch {
+    return null;
+  }
+};
+
+const getImageDimensions = (
+  img: HTMLImageElement,
+  fieldWidth: number,
+  fieldHeight: number,
+  crop?: ImageCrop | null,
+) => {
+  let imageWidth = crop?.width ?? img.width;
+  let imageHeight = crop?.height ?? img.height;
 
   const scalingFactor = Math.min(fieldWidth / imageWidth, fieldHeight / imageHeight, 1);
 
@@ -81,9 +174,12 @@ const createSignatureImage = (signatureImageAsBase64: string, fieldWidth: number
     });
 
     img.onload = () => {
+      const crop = getSignatureContentCrop(img, (w, h) => Object.assign(document.createElement('canvas'), { width: w, height: h }));
+
       image.setAttrs({
         image: img,
-        ...getImageDimensions(img, fieldWidth, fieldHeight),
+        ...(crop ? { crop } : {}),
+        ...getImageDimensions(img, fieldWidth, fieldHeight, crop),
       });
 
       // Cache the image as a high-resolution bitmap so it stays sharp on
@@ -107,9 +203,13 @@ const createSignatureImage = (signatureImageAsBase64: string, fieldWidth: number
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   const img = new SkiaImage(signatureImageAsBase64) as unknown as HTMLImageElement;
 
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  const crop = SkiaCanvas ? getSignatureContentCrop(img, (w, h) => new SkiaCanvas(w, h) as HTMLCanvasElement) : null;
+
   return new Konva.Image({
     image: img,
-    ...getImageDimensions(img, fieldWidth, fieldHeight),
+    ...(crop ? { crop } : {}),
+    ...getImageDimensions(img, fieldWidth, fieldHeight, crop),
     listening: false,
   });
 };
@@ -126,7 +226,11 @@ const createFieldSignature = (field: FieldToRender, options: RenderFieldElementO
     listening: false,
   });
 
-  const fieldTypeName = translations?.[field.type] || field.type;
+  // Stamp fields get their own placeholder label in a regular font so they
+  // are visually distinct from handwriting-style signature placeholders.
+  const isStampField = (field.fieldMeta as TSignatureFieldMeta | undefined)?.stamp === true;
+
+  const fieldTypeName = isStampField ? 'Stamp' : translations?.[field.type] || field.type;
 
   // Calculate text positioning based on alignment
   const textX = 0;
@@ -187,7 +291,7 @@ const createFieldSignature = (field: FieldToRender, options: RenderFieldElementO
     isLabel,
     textToRender,
     fontSize,
-    fontFamily: getSignatureFontFamily(textToRender),
+    fontFamily: isStampField && isLabel ? konvaTextFontFamily : getSignatureFontFamily(textToRender),
     lineHeight: 1,
     letterSpacing: 0,
     textAlign: 'center',
@@ -209,7 +313,7 @@ const createFieldSignature = (field: FieldToRender, options: RenderFieldElementO
     wrap: overflowLayout.wrap,
     text: textToRender,
     fontSize,
-    fontFamily: getSignatureFontFamily(textToRender),
+    fontFamily: isStampField && isLabel ? konvaTextFontFamily : getSignatureFontFamily(textToRender),
     align: overflowLayout.textAlign,
     width: overflowLayout.width,
     height: overflowLayout.height,
