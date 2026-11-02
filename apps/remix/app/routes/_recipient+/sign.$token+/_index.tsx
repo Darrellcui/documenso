@@ -28,6 +28,7 @@ import { getUserByEmail } from '@documenso/lib/server-only/user/get-user-by-emai
 import { DocumentAccessAuth } from '@documenso/lib/types/document-auth';
 import { isTspEnvelope } from '@documenso/lib/types/signature-level';
 import { extractDocumentAuthMethods } from '@documenso/lib/utils/document-auth';
+import { isStampFieldMeta } from '@documenso/lib/utils/fields';
 import { isRecipientExpired } from '@documenso/lib/utils/recipients';
 import { prisma } from '@documenso/prisma';
 import { SigningCard3D } from '@documenso/ui/components/signing-card';
@@ -164,7 +165,10 @@ const handleV1Loader = async ({ params, request }: Route.LoaderArgs) => {
     getTeamSettings({ teamId: document.teamId }),
   ]);
 
-  const [recipientSignature] = recipientSignatures;
+  // Stamp fields never pre-fill the reusable signature after a reload.
+  const recipientSignature = recipientSignatures.find(
+    (signature) => !isStampFieldMeta(fields.find((field) => field.id === signature.fieldId)?.fieldMeta),
+  );
 
   return {
     isDocumentAccessValid: true,

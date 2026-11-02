@@ -13,6 +13,7 @@ import type { TDocumentAuthMethods } from '../../types/document-auth';
 import { ZEnvelopeFieldSchema, ZFieldSchema } from '../../types/field';
 import { ZRecipientLiteSchema } from '../../types/recipient';
 import { isTspEnvelope } from '../../types/signature-level';
+import { isStampFieldMeta } from '../../utils/fields';
 import { isRecipientTurnBySigningOrder } from '../../utils/recipient-groups';
 import { isRecipientExpired } from '../../utils/recipients';
 import { isRecipientAuthorized } from '../document/is-recipient-authorized';
@@ -249,8 +250,9 @@ export const getEnvelopeForRecipientSigning = async ({
 
   const settings = await getTeamSettings({ teamId: envelope.teamId });
 
-  // Get the signature if they have put it in already.
-  const recipientSignature = await prisma.signature.findFirst({
+  // Get the signature if they have put it in already. Stamp fields are skipped
+  // so a reload never pre-fills the reusable signature with a stamp image.
+  const recipientSignatures = await prisma.signature.findMany({
     where: {
       field: {
         recipientId: recipient.id,
@@ -262,8 +264,18 @@ export const getEnvelopeForRecipientSigning = async ({
       recipientId: true,
       signatureImageAsBase64: true,
       typedSignature: true,
+      field: {
+        select: {
+          fieldMeta: true,
+        },
+      },
     },
   });
+
+  const recipientSignature =
+    recipientSignatures
+      .filter((signature) => !isStampFieldMeta(signature.field.fieldMeta))
+      .map(({ field: _field, ...signature }) => signature)[0] ?? null;
 
   const isRecipientsTurn =
     envelope.documentMeta.signingOrder !== DocumentSigningOrder.SEQUENTIAL ||

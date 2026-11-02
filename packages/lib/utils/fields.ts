@@ -132,3 +132,13 @@ export const getClientSideFieldTranslations = ({ t }: I18n): Record<FieldType, s
     [FieldType.EMAIL]: t(msg`Email`),
   };
 };
+
+/**
+ * Whether a field's meta marks it as a stamp (a signature field variant that
+ * holds a company seal instead of the signer's signature).
+ */
+export const isStampFieldMeta = (fieldMeta: unknown): boolean =>
+  typeof fieldMeta === 'object' &&
+  fieldMeta !== null &&
+  (fieldMeta as { type?: unknown }).type === 'signature' &&
+  (fieldMeta as { stamp?: unknown }).stamp === true;
