@@ -5,12 +5,7 @@ import { AppError } from '../../errors/app-error';
 import type { TSignatureFieldMeta } from '../../types/field-meta';
 import { resolveFieldOverflowMode } from '../../types/field-meta';
 import { calculateOverflowLayout } from './calculate-overflow-layout';
-import {
-  createFieldHoverInteraction,
-  konvaTextFontFamily,
-  upsertFieldGroup,
-  upsertFieldRect,
-} from './field-generic-items';
+import { createFieldHoverInteraction, upsertFieldGroup, upsertFieldRect } from './field-generic-items';
 import type { FieldToRender, RenderFieldElementOptions } from './field-renderer';
 import { calculateFieldPosition } from './field-renderer';
 
@@ -19,7 +14,7 @@ let SkiaImage: any;
 
 void (async () => {
   if (typeof window === 'undefined') {
-    const mod = await import('skia-canvas');
+    const mod = await import('@documenso/skia-canvas');
     SkiaImage = mod.Image;
   }
 })();
@@ -131,11 +126,7 @@ const createFieldSignature = (field: FieldToRender, options: RenderFieldElementO
     listening: false,
   });
 
-  // Stamp fields get their own placeholder label in a regular font so they
-  // are visually distinct from handwriting-style signature placeholders.
-  const isStampField = (field.fieldMeta as TSignatureFieldMeta | undefined)?.stamp === true;
-
-  const fieldTypeName = isStampField ? 'Stamp' : translations?.[field.type] || field.type;
+  const fieldTypeName = translations?.[field.type] || field.type;
 
   // Calculate text positioning based on alignment
   const textX = 0;
@@ -196,7 +187,7 @@ const createFieldSignature = (field: FieldToRender, options: RenderFieldElementO
     isLabel,
     textToRender,
     fontSize,
-    fontFamily: isStampField && isLabel ? konvaTextFontFamily : getSignatureFontFamily(textToRender),
+    fontFamily: getSignatureFontFamily(textToRender),
     lineHeight: 1,
     letterSpacing: 0,
     textAlign: 'center',
@@ -218,7 +209,7 @@ const createFieldSignature = (field: FieldToRender, options: RenderFieldElementO
     wrap: overflowLayout.wrap,
     text: textToRender,
     fontSize,
-    fontFamily: isStampField && isLabel ? konvaTextFontFamily : getSignatureFontFamily(textToRender),
+    fontFamily: getSignatureFontFamily(textToRender),
     align: overflowLayout.textAlign,
     width: overflowLayout.width,
     height: overflowLayout.height,

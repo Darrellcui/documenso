@@ -1,3 +1,4 @@
+import { useAnalytics } from '@documenso/lib/client-only/hooks/use-analytics';
 import { usePageRenderer } from '@documenso/lib/client-only/hooks/use-page-renderer';
 import {
   type PageRenderData,
@@ -53,6 +54,7 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
 
   const { executeActionAuthProcedure } = useRequiredDocumentSigningAuthContext();
   const { toast } = useToast();
+  const analytics = useAnalytics();
 
   const {
     envelopeData,
@@ -86,7 +88,7 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
   const cachedRenderFields = useRef<Map<number, Field & { signature?: Signature | null }>>(new Map());
   const prevShowPendingFieldTooltip = useRef(showPendingFieldTooltip);
 
-  const { onFieldSigned, onFieldUnsigned } = useEmbedSigningContext() || {};
+  const { onFieldSigned, onFieldUnsigned, onSignatureChanged } = useEmbedSigningContext() || {};
 
   const { stage, pageLayer, konvaContainer, unscaledViewport } = usePageRenderer(
     ({ stage, pageLayer }) => createPageCanvas(stage, pageLayer),
@@ -410,6 +412,7 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
                 // otherwise the next signature field would reuse the stamp.
                 if (!isStampField) {
                   setSignature(payload.value);
+                  onSignatureChanged?.(payload.value);
                 }
               } else {
                 await signField(field.id, payload);
@@ -434,6 +437,14 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
       unsafeRenderFieldOnLayer(unparsedField, fieldCanvasStyleCache);
     } catch (err) {
       console.error(err);
+
+      analytics.captureException(err, {
+        source: 'signing',
+        location: 'page_render',
+        recipientId: recipient.id,
+        envelopeId: envelope.id,
+      });
+
       setRenderError(true);
     }
   };
@@ -514,6 +525,14 @@ export const EnvelopeSignerPageRenderer = ({ pageData }: { pageData: PageRenderD
       }
     } catch (err) {
       console.error(err);
+
+      analytics.captureException(err, {
+        source: 'signing',
+        location: 'sign_field',
+        fieldType: payload.type,
+        recipientId: recipient.id,
+        envelopeId: envelope.id,
+      });
 
       toast({
         title: t`Error`,

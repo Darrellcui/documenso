@@ -2,6 +2,7 @@
 import { useLingui } from '@lingui/react';
 
 import { Column, Img, Section, Text } from '../components';
+import { getEmailAssetUrl } from '../utils/asset-url';
 import { TemplateDocumentImage } from './template-document-image';
 
 export interface TemplateDocumentRecipientSignedProps {
@@ -17,10 +18,6 @@ export const TemplateDocumentRecipientSigned = ({
   recipientEmail,
   assetBaseUrl,
 }: TemplateDocumentRecipientSignedProps) => {
-  const getAssetUrl = (path: string) => {
-    return new URL(path, assetBaseUrl).toString();
-  };
-
   const { i18n } = useLingui();
   const isZh = i18n.locale.toLowerCase().startsWith('zh');
 
@@ -35,7 +32,7 @@ export const TemplateDocumentRecipientSigned = ({
           <Column align="center">
             <Text className="font-semibold text-base text-foreground">
               <Img
-                src={getAssetUrl('/static/completed.png')}
+                src={getEmailAssetUrl(assetBaseUrl, 'static/completed.png')}
                 className="-mt-0.5 mr-2 inline h-7 w-7 align-middle"
                 alt=""
               />

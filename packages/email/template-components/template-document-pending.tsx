@@ -2,6 +2,7 @@
 import { useLingui } from '@lingui/react';
 
 import { Column, Img, Section, Text } from '../components';
+import { getEmailAssetUrl } from '../utils/asset-url';
 import { TemplateDocumentImage } from './template-document-image';
 
 export interface TemplateDocumentPendingProps {
@@ -13,10 +14,6 @@ export const TemplateDocumentPending = ({ documentName, assetBaseUrl }: Template
   const { i18n } = useLingui();
   const isZh = i18n.locale.toLowerCase().startsWith('zh');
 
-  const getAssetUrl = (path: string) => {
-    return new URL(path, assetBaseUrl).toString();
-  };
-
   return (
     <>
       <TemplateDocumentImage className="mt-6" assetBaseUrl={assetBaseUrl} />
@@ -25,7 +22,7 @@ export const TemplateDocumentPending = ({ documentName, assetBaseUrl }: Template
         <Section className="mb-4">
           <Column align="center">
             <Text className="font-semibold text-base text-foreground">
-              <Img src={getAssetUrl('/static/clock.png')} className="-mt-0.5 mr-2 inline h-7 w-7 align-middle" alt="" />
+              <Img src={getEmailAssetUrl(assetBaseUrl, 'static/clock.png')} className="-mt-0.5 mr-2 inline h-7 w-7 align-middle" alt="" />
               {isZh ? '等待其他签署方 · Waiting for others' : 'Waiting for others'}
             </Text>
           </Column>

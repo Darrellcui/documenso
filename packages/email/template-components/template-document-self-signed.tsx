@@ -1,6 +1,7 @@
 import { useLingui } from '@lingui/react';
 
 import { Column, Img, Section, Text } from '../components';
+import { getEmailAssetUrl } from '../utils/asset-url';
 import { TemplateDocumentImage } from './template-document-image';
 
 export interface TemplateDocumentSelfSignedProps {
@@ -12,10 +13,6 @@ export const TemplateDocumentSelfSigned = ({ documentName, assetBaseUrl }: Templ
   const { i18n } = useLingui();
   const isZh = i18n.locale.toLowerCase().startsWith('zh');
 
-  const getAssetUrl = (path: string) => {
-    return new URL(path, assetBaseUrl).toString();
-  };
-
   return (
     <>
       <TemplateDocumentImage className="mt-6" assetBaseUrl={assetBaseUrl} />
@@ -25,7 +22,7 @@ export const TemplateDocumentSelfSigned = ({ documentName, assetBaseUrl }: Templ
           <Column align="center">
             <Text className="font-semibold text-base text-foreground">
               <Img
-                src={getAssetUrl('/static/completed.png')}
+                src={getEmailAssetUrl(assetBaseUrl, 'static/completed.png')}
                 className="-mt-0.5 mr-2 inline h-7 w-7 align-middle"
                 alt=""
               />
