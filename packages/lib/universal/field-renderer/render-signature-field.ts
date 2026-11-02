@@ -77,10 +77,18 @@ const getSignatureContentCrop = (img: HTMLImageElement, createCanvas: (w: number
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
         if (data[(y * width + x) * 4 + 3] > SIGNATURE_TRIM_ALPHA_THRESHOLD) {
-          if (x < minX) minX = x;
-          if (x > maxX) maxX = x;
-          if (y < minY) minY = y;
-          if (y > maxY) maxY = y;
+          if (x < minX) {
+            minX = x;
+          }
+          if (x > maxX) {
+            maxX = x;
+          }
+          if (y < minY) {
+            minY = y;
+          }
+          if (y > maxY) {
+            maxY = y;
+          }
         }
       }
     }
@@ -174,7 +182,9 @@ const createSignatureImage = (signatureImageAsBase64: string, fieldWidth: number
     });
 
     img.onload = () => {
-      const crop = getSignatureContentCrop(img, (w, h) => Object.assign(document.createElement('canvas'), { width: w, height: h }));
+      const crop = getSignatureContentCrop(img, (w, h) =>
+        Object.assign(document.createElement('canvas'), { width: w, height: h }),
+      );
 
       image.setAttrs({
         image: img,

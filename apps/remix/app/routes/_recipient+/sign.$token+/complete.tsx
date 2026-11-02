@@ -275,7 +275,6 @@ export default function CompletedSigningPage({ loaderData }: Route.ComponentProp
               )}
             </div>
           </div>
-
         </div>
       </div>
     </>

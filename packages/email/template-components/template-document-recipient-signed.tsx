@@ -1,4 +1,3 @@
-
 import { useLingui } from '@lingui/react';
 
 import { Column, Img, Section, Text } from '../components';
@@ -42,7 +41,9 @@ export const TemplateDocumentRecipientSigned = ({
         </Section>
 
         <Text className="mb-0 text-center font-semibold text-foreground text-lg">
-          {isZh ? `${recipientReference} 已签署 "${documentName}"` : `${recipientReference} has signed "${documentName}"`}
+          {isZh
+            ? `${recipientReference} 已签署 "${documentName}"`
+            : `${recipientReference} has signed "${documentName}"`}
         </Text>
         {isZh && (
           <Text className="mt-1 mb-0 text-center font-medium text-base text-muted-foreground">
@@ -51,7 +52,9 @@ export const TemplateDocumentRecipientSigned = ({
         )}
 
         <Text className="mx-auto mt-3 mb-6 max-w-[80%] text-center text-muted-foreground text-sm">
-          {isZh ? '该签署方已完成签署。 · This recipient has completed signing.' : 'This recipient has completed signing.'}
+          {isZh
+            ? '该签署方已完成签署。 · This recipient has completed signing.'
+            : 'This recipient has completed signing.'}
         </Text>
       </Section>
     </>

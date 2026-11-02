@@ -6,11 +6,9 @@ import path from 'node:path';
 import type { Canvas } from '@documenso/skia-canvas';
 import { Image as SkiaImage } from '@documenso/skia-canvas';
 import type { I18n } from '@lingui/core';
-import type { Field, RecipientRole, Signature } from '@prisma/client';
-import { SigningStatus } from '@prisma/client';
+import type { Field, RecipientRole, Signature, SigningStatus } from '@prisma/client';
 import Konva from 'konva';
 import { DateTime } from 'luxon';
-import { UAParser } from 'ua-parser-js';
 import { renderSVG } from 'uqr';
 
 import { NEXT_PUBLIC_WEBAPP_URL } from '../../constants/app';
@@ -86,8 +84,7 @@ const iconSvgs: Record<IconKind, string> = {
   completed: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="${iconGreen}"/><path d="M7 12.2l3.3 3.3L17 8.8" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
 };
 
-const fmtDateTime = (date: Date) =>
-  DateTime.fromJSDate(date).setZone('utc').toFormat('yyyy-MM-dd HH:mm:ss') + ' (UTC)';
+const fmtDateTime = (date: Date) => DateTime.fromJSDate(date).setZone('utc').toFormat('yyyy-MM-dd HH:mm:ss') + ' (UTC)';
 
 const fmtDate = (date: Date) => DateTime.fromJSDate(date).setZone('utc').toFormat('yyyy-MM-dd');
 

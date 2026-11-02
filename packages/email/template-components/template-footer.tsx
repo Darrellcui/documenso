@@ -41,7 +41,6 @@ export const TemplateFooter = ({ isDocument = true, reportUrl }: TemplateFooterP
           })}
         </Text>
       )}
-
     </Section>
   );
 };

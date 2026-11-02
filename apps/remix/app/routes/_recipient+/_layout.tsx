@@ -39,7 +39,7 @@ export default function RecipientLayout({ matches }: Route.ComponentProps) {
     // light surface, and a viewer's system dark mode would otherwise put dark
     // brand text on a dark background. `dark-mode-disabled` forces the light
     // token set (see theme.css) regardless of the global `.dark` class.
-    <div className="min-h-screen bg-background dark-mode-disabled">
+    <div className="dark-mode-disabled min-h-screen bg-background">
       {!hideHeader && sessionData?.user && <AuthenticatedHeader />}
 
       <main

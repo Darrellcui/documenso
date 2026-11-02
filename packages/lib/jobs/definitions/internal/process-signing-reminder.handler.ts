@@ -126,8 +126,6 @@ export const run = async ({ payload, io }: { payload: TProcessSigningReminderJob
     return;
   }
 
-
-
   // Chinese documents get a bilingual subject; other languages get English.
   const isZh = (emailLanguage ?? '').toLowerCase().startsWith('zh');
 

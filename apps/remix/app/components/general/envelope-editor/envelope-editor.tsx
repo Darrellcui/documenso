@@ -294,9 +294,7 @@ export const EnvelopeEditor = () => {
                       <div>
                         <div
                           className={`font-medium text-sm ${
-                            isActive
-                              ? 'text-primary'
-                              : 'text-foreground dark:text-muted-foreground'
+                            isActive ? 'text-primary' : 'text-foreground dark:text-muted-foreground'
                           }`}
                         >
                           {t(step.title)}

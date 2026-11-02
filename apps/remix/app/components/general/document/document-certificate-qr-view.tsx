@@ -19,8 +19,8 @@ import { useLingui } from '@lingui/react';
 import { Trans } from '@lingui/react/macro';
 import { type DocumentData, DocumentStatus, type EnvelopeItem, EnvelopeType } from '@prisma/client';
 import { CheckCircle2, DownloadIcon } from 'lucide-react';
-import type { ReactNode } from 'react';
 import { DateTime } from 'luxon';
+import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 
 import { EnvelopeDownloadDialog } from '~/components/dialogs/envelope-download-dialog';

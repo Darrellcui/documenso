@@ -85,7 +85,6 @@ export const run = async ({ payload, io }: { payload: TSendRecipientSignedEmailJ
 
   const assetBaseUrl = NEXT_PUBLIC_WEBAPP_URL() || 'http://localhost:3000';
 
-
   const template = createElement(DocumentRecipientSignedEmailTemplate, {
     documentName: envelope.title,
     recipientName,
@@ -109,7 +108,9 @@ export const run = async ({ payload, io }: { payload: TSendRecipientSignedEmailJ
         address: owner.email,
       },
       from: senderEmail,
-      subject: isZh ? `${recipientReference} 已签署 "${envelope.title}" · Recipient signed` : `${recipientReference} signed "${envelope.title}"`,
+      subject: isZh
+        ? `${recipientReference} 已签署 "${envelope.title}" · Recipient signed`
+        : `${recipientReference} signed "${envelope.title}"`,
       html,
       text,
     });

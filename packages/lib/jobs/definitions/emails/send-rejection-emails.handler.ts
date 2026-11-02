@@ -103,7 +103,9 @@ export const run = async ({ payload, io }: { payload: TSendSigningRejectionEmail
         },
         from: senderEmail,
         replyTo: replyToEmail,
-        subject: isZh ? `文件 "${envelope.title}" 拒签已确认 · Rejection Confirmed` : `Rejection confirmed for "${envelope.title}"`,
+        subject: isZh
+          ? `文件 "${envelope.title}" 拒签已确认 · Rejection Confirmed`
+          : `Rejection confirmed for "${envelope.title}"`,
         html,
         text,
       });
@@ -135,7 +137,9 @@ export const run = async ({ payload, io }: { payload: TSendSigningRejectionEmail
         address: documentOwner.email,
       },
       from: DOCUMENSO_INTERNAL_EMAIL, // Purposefully using internal email here.
-      subject: isZh ? `文件 "${envelope.title}" 已被 ${recipient.name} 拒签 · Document Rejected` : `Document "${envelope.title}" rejected by ${recipient.name}`,
+      subject: isZh
+        ? `文件 "${envelope.title}" 已被 ${recipient.name} 拒签 · Document Rejected`
+        : `Document "${envelope.title}" rejected by ${recipient.name}`,
       html,
       text,
     });

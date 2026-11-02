@@ -968,23 +968,23 @@ const FieldActionButtons = ({
               {fieldButtonList
                 .filter((field) => !field.stamp)
                 .map((field) => {
-                const FieldIcon = field.icon;
-                const label = t(FRIENDLY_FIELD_TYPE[field.type]);
+                  const FieldIcon = field.icon;
+                  const label = t(FRIENDLY_FIELD_TYPE[field.type]);
 
-                return (
-                  <CommandItem
-                    key={field.type}
-                    className="px-2"
-                    onSelect={() => {
-                      handleChangeFieldType(field.type);
-                      setShowFieldTypeSelector(false);
-                    }}
-                  >
-                    <FieldIcon className="mr-2 h-4 w-4" />
-                    <span className="truncate">{label}</span>
-                  </CommandItem>
-                );
-              })}
+                  return (
+                    <CommandItem
+                      key={field.type}
+                      className="px-2"
+                      onSelect={() => {
+                        handleChangeFieldType(field.type);
+                        setShowFieldTypeSelector(false);
+                      }}
+                    >
+                      <FieldIcon className="mr-2 h-4 w-4" />
+                      <span className="truncate">{label}</span>
+                    </CommandItem>
+                  );
+                })}
             </CommandGroup>
           </CommandList>
         </Command>

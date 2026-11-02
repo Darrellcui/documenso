@@ -1,4 +1,3 @@
-
 import { useLingui } from '@lingui/react';
 
 import { Button, Heading, Text } from '../components';

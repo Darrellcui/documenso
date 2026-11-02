@@ -86,7 +86,6 @@ export const run = async ({ payload, io }: { payload: TSendDocumentCancelledEmai
     return;
   }
 
-
   // Send cancellation emails to recipients who have been sent the document or viewed it.
   // CC recipients are excluded because they were never actually emailed about the document
   // (CC recipients are created with sendStatus=SENT by default but never receive a signing
@@ -148,7 +147,9 @@ export const run = async ({ payload, io }: { payload: TSendDocumentCancelledEmai
           },
           from: senderEmail,
           replyTo: replyToEmail,
-          subject: isZh ? `文件 "${envelope.title}" 已取消 · Document Cancelled` : `Document "${envelope.title}" cancelled`,
+          subject: isZh
+            ? `文件 "${envelope.title}" 已取消 · Document Cancelled`
+            : `Document "${envelope.title}" cancelled`,
           html,
           text,
         });

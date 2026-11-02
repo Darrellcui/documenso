@@ -82,7 +82,6 @@ export const run = async ({ payload, io }: { payload: TSendRecipientRemovedEmail
     assetBaseUrl,
   });
 
-
   await io.runTask('send-recipient-removed-email', async () => {
     const [html, text] = await Promise.all([
       renderEmailWithI18N(template, { lang: emailLanguage, branding }),
@@ -96,7 +95,9 @@ export const run = async ({ payload, io }: { payload: TSendRecipientRemovedEmail
       },
       from: senderEmail,
       replyTo: replyToEmail,
-      subject: isZh ? '您已被移出某文件 · You have been removed from a document' : 'You have been removed from a document',
+      subject: isZh
+        ? '您已被移出某文件 · You have been removed from a document'
+        : 'You have been removed from a document',
       html,
       text,
     });

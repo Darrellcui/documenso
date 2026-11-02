@@ -1,4 +1,3 @@
-
 import { useLingui } from '@lingui/react';
 
 import { Section, Text } from '../components';

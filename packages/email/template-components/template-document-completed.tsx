@@ -41,7 +41,8 @@ export const TemplateDocumentCompleted = ({
         </Section>
 
         <Text className="mb-0 text-center font-semibold text-foreground text-lg">
-          {customBody || (isZh ? `"${documentName}" 已由所有签署方完成签署` : `"${documentName}" was signed by all signers`)}
+          {customBody ||
+            (isZh ? `"${documentName}" 已由所有签署方完成签署` : `"${documentName}" was signed by all signers`)}
         </Text>
 
         {isZh && (
@@ -58,7 +59,11 @@ export const TemplateDocumentCompleted = ({
             className="rounded-lg border border-border border-solid px-4 py-2 text-center font-medium text-foreground text-sm no-underline"
             href={downloadLink}
           >
-            <Img src={getEmailAssetUrl(assetBaseUrl, 'static/download.png')} className="mr-2 mb-0.5 inline h-5 w-5 align-middle" alt="" />
+            <Img
+              src={getEmailAssetUrl(assetBaseUrl, 'static/download.png')}
+              className="mr-2 mb-0.5 inline h-5 w-5 align-middle"
+              alt=""
+            />
             {isZh ? '下载文件 · Download' : 'Download'}
           </Button>
         </Section>

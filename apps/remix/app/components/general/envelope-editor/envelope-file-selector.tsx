@@ -23,9 +23,7 @@ export const EnvelopeItemSelector = ({
     <button
       title={typeof primaryText === 'string' ? primaryText : undefined}
       className={`group flex h-fit max-w-72 flex-shrink-0 cursor-pointer items-center space-x-3 rounded-lg border px-4 py-3 transition-colors ${
-        isSelected
-          ? 'border-primary/30 bg-primary/10 text-primary'
-          : 'border-border bg-muted/50 hover:bg-muted/70'
+        isSelected ? 'border-primary/30 bg-primary/10 text-primary' : 'border-border bg-muted/50 hover:bg-muted/70'
       }`}
       {...buttonProps}
     >

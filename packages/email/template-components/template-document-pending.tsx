@@ -1,4 +1,3 @@
-
 import { useLingui } from '@lingui/react';
 
 import { Column, Img, Section, Text } from '../components';
@@ -22,7 +21,11 @@ export const TemplateDocumentPending = ({ documentName, assetBaseUrl }: Template
         <Section className="mb-4">
           <Column align="center">
             <Text className="font-semibold text-base text-foreground">
-              <Img src={getEmailAssetUrl(assetBaseUrl, 'static/clock.png')} className="-mt-0.5 mr-2 inline h-7 w-7 align-middle" alt="" />
+              <Img
+                src={getEmailAssetUrl(assetBaseUrl, 'static/clock.png')}
+                className="-mt-0.5 mr-2 inline h-7 w-7 align-middle"
+                alt=""
+              />
               {isZh ? '等待其他签署方 · Waiting for others' : 'Waiting for others'}
             </Text>
           </Column>

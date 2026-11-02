@@ -75,7 +75,6 @@ export const run = async ({ payload, io }: { payload: TSendOwnerRecipientExpired
     return;
   }
 
-
   const documentLink = `${NEXT_PUBLIC_WEBAPP_URL()}${formatDocumentsPath(envelope.team.url)}/${envelope.id}`;
 
   const template = createElement(RecipientExpiredTemplate, {
@@ -102,7 +101,9 @@ export const run = async ({ payload, io }: { payload: TSendOwnerRecipientExpired
         address: documentOwner.email,
       },
       from: senderEmail,
-      subject: isZh ? `签署期限已过期："${recipient.name || recipient.email}" · Signing window expired` : `Signing window expired for "${recipient.name || recipient.email}"`,
+      subject: isZh
+        ? `签署期限已过期："${recipient.name || recipient.email}" · Signing window expired`
+        : `Signing window expired for "${recipient.name || recipient.email}"`,
       html,
       text,
     });

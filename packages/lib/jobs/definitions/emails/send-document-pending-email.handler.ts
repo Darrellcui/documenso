@@ -84,7 +84,6 @@ export const run = async ({ payload }: { payload: TSendDocumentPendingEmailJobDe
     }),
   ]);
 
-
   await emailTransport.sendMail({
     to: {
       address: email,

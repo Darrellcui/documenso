@@ -158,7 +158,9 @@ export const run = async ({ payload, io }: { payload: TSendSigningEmailJobDefini
     emailMessage = i18n._(
       msg`You have initiated the document ${`"${envelope.title}"`} that requires you to ${recipientActionVerb} it.`,
     );
-    emailSubject = isZh ? `请${zhAction}您的文件 · Please ${enAction} your document` : `Please ${enAction} your document`;
+    emailSubject = isZh
+      ? `请${zhAction}您的文件 · Please ${enAction} your document`
+      : `Please ${enAction} your document`;
   }
 
   if (isDirectTemplate) {
